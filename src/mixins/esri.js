@@ -10,8 +10,15 @@ var esri = {
           color: [226, 119, 40],
           outline: {
             color: [255, 255, 255],
-            width: 2
+            width: 0
           }
+        },
+        Vehicles:[],
+        vehicleSelected:{
+          attributes:{},
+          geometries:[],
+          lastPosition:null,
+          isTraked:null
         },
         geoqueryTask: null,
         queryCarIntersection: null,
@@ -92,7 +99,6 @@ var esri = {
             this.NewQuery = function() {
               return new Query({
                 outFields: ["*"],
-                orderByFields: ["POSI_ID"],
                 returnGeometry: true
               })
             }
@@ -130,18 +136,74 @@ var esri = {
       }
     },
     methods:{
-        GetVehicle(color){
-          var self = this;
+      GetVehicle(VEHICLE_ID){
+        var self = this;
+        if(self.vehicleSelected.attributes.VEHICLE_ID != VEHICLE_ID){
+          clearInterval(self.vehicleSelected.isTraked);
+          self.vehicleSelected = {};
+
           var query = self.NewQuery();
-          query.where = `"COLOR_VEHI" = '${color}'`;
-          console.log(color + ' ' + query.where);
-          
+            query.orderByFields = ["POSI_ID"],
+            query.where = `"VEHICLE_ID" = '${VEHICLE_ID}'`;
+
           self.queryDotsPathTask.execute(query).then(function(result){
+            var features = result.features;
+            var geometries = [];
+            var attributes = {};
+            features.forEach(function(element){
+              attributes = element.attributes;
+              geometries.push(element.geometry);
+            });
+            self.vehicleSelected = {attributes: attributes, geometry: geometries};
+            self.Track(self.vehicleSelected.geometry[0]);
+            self.StarSimulation();
+          });
+        }else{
+          self.Track(self.vehicleSelected.lastPosition);
+        }
+      },
+      StarSimulation(){
+        var self = this;
+        var currentCoordIndex = 0;
+        self.vehicleSelected.isTraked =  setInterval(function() {
+              self.PointMove(self.vehicleSelected.geometry[currentCoordIndex]);
+              self.Intersection(self.vehicleSelected.geometry[currentCoordIndex]);
+              //self.Track(self.trakRout[currentCoordIndex]);
+              currentCoordIndex = (currentCoordIndex + 1) % self.vehicleSelected.geometry.length;
+          }, 300);
+      },
+      GetAllVehicles(){
+        var self = this;
+
+        var query = self.NewQuery();
+          query.orderByFields = ["VEHICLE_ID"],
+          query.where = "1=1";
+        
+        self.queryDotsPathTask.execute(query).then(function(result){
+          self.coords = [];
+          var features = result.features;
+          features.forEach(function(element){
+            var placas = element.attributes.PLACAS_VEH;
+            
+            self.coords.push({"COLOR_VEHI ": color, "PLACAS_VEH ": placas, "POSI_ID": id , "latitude": latitude, "longitude":longitude})
+            self.trakRout.push(element.geometry);
+          });
+          //console.log(self.coords);
+          self.$store.state.coords = self.coords;
+          self.$store.state.trackCoods = self.trakRout;
+          self.Track(self.getTrakRout[0]);
+          self.Simulation();
+          //console.log(self.$store.state.coords);
+        });
+      },
+      Start(){
+          var self = this;
+          self.queryDotsPathTask.execute(self.queryDots).then(function(result){
             self.coords = [];
             var features = result.features;
             features.forEach(function(element){
-              var color = element.attributes.COLOR_VEHI ;
-              var placas = element.attributes.PLACAS_VEH  ;
+              var color = element.attributes.COLOR_VEHI;
+              var placas = element.attributes.PLACAS_VEH;
               var id = element.attributes.POSI_ID;
               var latitude = element.geometry.latitude;
               var longitude = element.geometry.longitude;
@@ -149,97 +211,70 @@ var esri = {
               self.trakRout.push(element.geometry);
             });
             //console.log(self.coords);
-            self.$store.state.coords = self.coords;
-            self.$store.state.trackCoods = self.trakRout;
-            self.Track(self.getTrakRout[0]);
+            self.Track(self.trakRout[0]);
             self.Simulation();
-            //console.log(self.$store.state.coords);
           });
-        },
-        Start(){
-            var self = this;
-            self.queryDotsPathTask.execute(self.queryDots).then(function(result){
-              self.coords = [];
-              var features = result.features;
-              features.forEach(function(element){
-                var color = element.attributes.COLOR_VEHI ;
-                var placas = element.attributes.PLACAS_VEH  ;
-                var id = element.attributes.POSI_ID;
-                var latitude = element.geometry.latitude;
-                var longitude = element.geometry.longitude;
-                self.coords.push({"COLOR_VEHI ": color, "PLACAS_VEH ": placas, "POSI_ID": id , "latitude": latitude, "longitude":longitude})
-                self.trakRout.push(element.geometry);
-              });
-              //console.log(self.coords);
-              self.Track(self.trakRout[0]);
-              self.Simulation();
-            });
-        },
-        Simulation(){
-            var currentCoordIndex = 0;
-            var self = this;
-            setInterval(function() {
-                self.PointMove(self.getCoords[currentCoordIndex]);
-                self.Intersection(self.getTrakRout[currentCoordIndex]);
-                //self.Track(self.trakRout[currentCoordIndex]);
-                currentCoordIndex = (currentCoordIndex + 1) % self.coords.length;
-            }, 300);
-        },
-        PointMove(coords) {
-            var point = {
-                type: "point",
-                longitude: coords.longitude,
-                latitude: coords.latitude,
+      },
+      Simulation(){
+          var currentCoordIndex = 0;
+          var self = this;
+          setInterval(function() {
+              self.PointMove(self.getCoords[currentCoordIndex]);
+              self.Intersection(self.getTrakRout[currentCoordIndex]);
+              //self.Track(self.trakRout[currentCoordIndex]);
+              currentCoordIndex = (currentCoordIndex + 1) % self.coords.length;
+          }, 1000);
+      },
+      PointMove(geometry) {
+          var pointGraphic = this.NewGraphic();
+          pointGraphic.geometry = geometry;
+          this.vehicleSelected.lastPosition = geometry;
+          this.getView.graphics.removeAll();
+          this.getView.graphics.add(pointGraphic);
+      },
+      Intersection(carPosition){
+          this.queryCarIntersection.geometry = carPosition;
+          this.geoqueryTask.execute(this.queryCarIntersection).then(function(results){
+              //if(results.features != null)
+              console.log("Esta en: " + results.features[0].attributes.NOMBRE);
+          });
+
+          this.geoqueryTask.executeForCount(this.queryCarIntersection).then(function(results){
+              //console.log(results);
+          });
+      },
+      Track(location) {
+          var prevLocation = this.getView.center;
+          this.getView.goTo({
+              center: location,
+              scale: 15000,
+          });
+          //prevLocation = location.clone();
+      },
+      ClickMap(name){
+          var self = this;
+          self.GetClickPosition();
+          setTimeout(() => {
+              self.CreateVeicles(self.clickPosition, name);
+          }, 500);
+      },
+      CreateVeicles(location, name='nadie'){
+          var point = {
+              type: "point", // autocasts as new Point()
+              longitude: location.longitude,
+              latitude: location.latitude
             };
+    
+            // Create a graphic and add the geometry and symbol to it
             var pointGraphic = this.NewGraphic();
             pointGraphic.geometry = point;
-            pointGraphic.attributes = {Nombre: 'Michelle', Vehiculo: '001', Palacas: 'abc'}
-            //this.getView.graphics.removeAll();
+            pointGraphic.attributes = {Nombre: name, Vehiculo: '001', Palacas: 'abc'}
             this.getView.graphics.add(pointGraphic);
-        },
-        Intersection(carPosition){
-            this.queryCarIntersection.geometry = carPosition;
-            this.geoqueryTask.execute(this.queryCarIntersection).then(function(results){
-                //if(results.features != null)
-                console.log("Esta en: " + results.features[0].attributes.NOMBRE);
-            });
-
-            this.geoqueryTask.executeForCount(this.queryCarIntersection).then(function(results){
-                //console.log(results);
-            });
-        },
-        Track(location) {
-            var prevLocation = this.getView.center;
-            this.getView.goTo({
-                center: location,
-                scale: 14000,
-            });
-            prevLocation = location.clone();
-        },
-        ClickMap(name){
-            var self = this;
-            self.GetClickPosition();
-            setTimeout(() => {
-                self.CreateVeicles(self.clickPosition, name);
-            }, 500);
-        },
-        CreateVeicles(location, name='nadie'){
-            var point = {
-                type: "point", // autocasts as new Point()
-                longitude: location.longitude,
-                latitude: location.latitude
-              };
-      
-              // Create a graphic and add the geometry and symbol to it
-              var pointGraphic = this.NewGraphic();
-              pointGraphic.geometry = point;
-              pointGraphic.attributes = {Nombre: name, Vehiculo: '001', Palacas: 'abc'}
-              this.getView.graphics.add(pointGraphic);
-        },
-        TestTrak(name){
-            console.log('Traking: ' + name);
-            //this.Track(self.trakRout[0]);
-        }
+      },
+      TestTrak(name){
+          console.log('Traking: ' + name);
+          //this.Track(self.trakRout[0]);
+      }
     }
   }
 export default esri;

@@ -4,7 +4,7 @@
     <v-card>
         <v-card-text style="height: 90vh; position: relative">
           <div v-on:click="ClickMap" id="viewDiv" class="viewDiv"></div>
-          <v-btn style="bottom: 40px; right: 35px" absolute dark fab bottom right color="pink" @click="GetVehicle()" >
+          <v-btn style="bottom: 40px; right: 35px" absolute dark fab bottom right color="pink" @click="GetAllVehicles" >
             <v-icon>trending_up</v-icon>
           </v-btn>
         </v-card-text>
