@@ -18,7 +18,7 @@
             <v-list-tile-avatar>
               <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt="">
             </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.text" style="cursor: pointer;" @click="GetVehicle(item.VEHICLE_ID)"></v-list-tile-title>
+            <v-list-tile-title v-text="item.text" style="cursor: pointer;"></v-list-tile-title>
           </v-list-tile>
         </v-list>
         <v-list-tile class="mt-3" @click="">
@@ -57,9 +57,7 @@
 </template>
 
 <script>
-import esriMethos from './../mixins/esri.js';
 export default {
-  mixins: [esriMethos],
         data: () => ({
             drawer: false,
             items: [

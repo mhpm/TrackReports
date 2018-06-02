@@ -123,6 +123,9 @@ var esri = {
           });
       },
     created(){
+      setTimeout(() => {
+        //this.GetAllVehicles()
+      }, 0);
     },
     computed:{
       getCoords(){
@@ -133,17 +136,27 @@ var esri = {
       },
       getView(){
         return this.$store.state.view;
+      },
+      getChoferes(){
+        return this.$store.state.choferes;
       }
     },
     methods:{
       GetVehicle(VEHICLE_ID){
         var self = this;
+
         if(self.vehicleSelected.attributes.VEHICLE_ID != VEHICLE_ID){
+          console.log(VEHICLE_ID)
           clearInterval(self.vehicleSelected.isTraked);
-          self.vehicleSelected = {};
+          self.vehicleSelected = {
+            attributes:{},
+            geometries:[],
+            lastPosition:null,
+            isTraked:null
+          }
 
           var query = self.NewQuery();
-            query.orderByFields = ["POSI_ID"],
+            query.orderByFields = ["POSI_ID"];
             query.where = `"VEHICLE_ID" = '${VEHICLE_ID}'`;
 
           self.queryDotsPathTask.execute(query).then(function(result){
@@ -168,33 +181,40 @@ var esri = {
         self.vehicleSelected.isTraked =  setInterval(function() {
               self.PointMove(self.vehicleSelected.geometry[currentCoordIndex]);
               self.Intersection(self.vehicleSelected.geometry[currentCoordIndex]);
-              //self.Track(self.trakRout[currentCoordIndex]);
+              //self.Track(self.vehicleSelected.geometry[currentCoordIndex]);
               currentCoordIndex = (currentCoordIndex + 1) % self.vehicleSelected.geometry.length;
           }, 300);
       },
       GetAllVehicles(){
         var self = this;
-
+        self.Vehicles = [];
         var query = self.NewQuery();
           query.orderByFields = ["VEHICLE_ID"],
           query.where = "1=1";
-        
-        self.queryDotsPathTask.execute(query).then(function(result){
-          self.coords = [];
-          var features = result.features;
-          features.forEach(function(element){
-            var placas = element.attributes.PLACAS_VEH;
-            
-            self.coords.push({"COLOR_VEHI ": color, "PLACAS_VEH ": placas, "POSI_ID": id , "latitude": latitude, "longitude":longitude})
-            self.trakRout.push(element.geometry);
+
+          self.queryDotsPathTask.execute(query).then(function(result){
+            var features = result.features;
+            var geometries = [];
+            var attributes = {};
+            var tempVehicle = {};
+            self.getChoferes.forEach(function(chofer){ 
+              geometries = [];
+              features.forEach(function(element){
+                if(element.attributes.VEHICLE_ID == chofer.VEHICLE_ID){
+                    console.log(chofer.VEHICLE_ID);
+                    attributes = element.attributes;
+                    geometries.push(element.geometry);
+                  }
+                  tempVehicle = {attributes: attributes, geometry: geometries};
+              });
+              self.Vehicles.push({VEHICLE_ID: chofer.VEHICLE_ID, picture: Math.floor((Math.random() * 10) + 1), color: chofer.color, nombre: chofer.text, vehicle: tempVehicle, currentCoordIndex: 0});
+              self.$store.state.vehicles = self.Vehicles;
+            });
+            // console.log(self.Vehicles)
+            self.$store.state.vehicles.forEach(function(vehicle){
+              self.Simulation(vehicle);
+            })
           });
-          //console.log(self.coords);
-          self.$store.state.coords = self.coords;
-          self.$store.state.trackCoods = self.trakRout;
-          self.Track(self.getTrakRout[0]);
-          self.Simulation();
-          //console.log(self.$store.state.coords);
-        });
       },
       Start(){
           var self = this;
@@ -215,15 +235,24 @@ var esri = {
             self.Simulation();
           });
       },
-      Simulation(){
-          var currentCoordIndex = 0;
-          var self = this;
+      Simulation(vehicle){
+        var self = this;
+        vehicle.currentCoordIndex = 0;
           setInterval(function() {
-              self.PointMove(self.getCoords[currentCoordIndex]);
-              self.Intersection(self.getTrakRout[currentCoordIndex]);
+              self.SinglePointMove(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
+              self.Intersection(vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               //self.Track(self.trakRout[currentCoordIndex]);
-              currentCoordIndex = (currentCoordIndex + 1) % self.coords.length;
-          }, 1000);
+              vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
+          }, 500);
+      },
+      SinglePointMove(vehicle, geometry) {
+        vehicle.lastPosition = vehicle.currentPosition;
+        var newPosition = this.NewGraphic();
+        newPosition.geometry = geometry;
+        vehicle.currentPosition = newPosition;
+          
+          this.getView.graphics.remove(vehicle.lastPosition);
+          this.getView.graphics.add(newPosition);
       },
       PointMove(geometry) {
           var pointGraphic = this.NewGraphic();
@@ -243,13 +272,23 @@ var esri = {
               //console.log(results);
           });
       },
+      TrackVehicle(VEHICLE_ID) {
+        var vehicle = this.$store.state.vehicles.find(function(element) {
+          return element.VEHICLE_ID > VEHICLE_ID;
+        });
+        this.vehicleSelected = vehicle;
+        this.getView.goTo({
+            center: vehicle.currentPosition,
+            scale: 15000,
+        });
+    },
       Track(location) {
           var prevLocation = this.getView.center;
           this.getView.goTo({
               center: location,
               scale: 15000,
           });
-          //prevLocation = location.clone();
+          prevLocation = location.clone();
       },
       ClickMap(name){
           var self = this;

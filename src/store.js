@@ -14,6 +14,7 @@ export default new Vuex.Store({
       // { id: 5, picture: 78, color: "Gris", text: "MKBHD" }
     ],
     coords: [],
-    trackCoods: []
+    trackCoods: [],
+    vehicles:[]
   }
 });
