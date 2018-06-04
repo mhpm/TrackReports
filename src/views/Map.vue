@@ -57,8 +57,9 @@
     <v-card>
       <v-card-title primary-title>
         <div>
-          <h3 class="headline mb-0">ID: {{vehicleSelected.attributes.VEHICLE_ID}}</h3>
-          <div>Located two hours south of Sydney in the <br>Southern Highlands</div>
+          <h3 class="headline mb-0">Placas: {{vehicleSelected.PLACAS_VEH}}</h3>
+          <div>Chofer: {{vehicleSelected.nombre}}<br>
+              Color del Vehiculo: {{vehicleSelected.COLOR_VEHI}}</div>
         </div>
       </v-card-title>
       <v-card-actions>
@@ -71,7 +72,7 @@
     <v-flex>
       <v-card>
           <v-card-text style="height: 90vh; position: relative">
-            <div v-on:click="ClickMap" id="viewDiv" class="viewDiv"></div>
+            <div v-on:click="" id="viewDiv" class="viewDiv"></div>
             <v-btn style="bottom: 50px; right: 50px" absolute dark fab bottom right color="pink" @click="GetAllVehicles" >
               <v-icon>trending_up</v-icon>
             </v-btn>
@@ -103,9 +104,6 @@ export default {
     }
   },
   computed:{
-      choferes(){
-          return this.$store.state.choferes;
-      },
       vehicles(){
           return this.$store.state.vehicles;
       }
