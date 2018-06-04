@@ -5,6 +5,9 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 
+import moment from "moment";
+Vue.prototype.moment = moment;
+
 import { loadScript } from "esri-loader";
 // preload the ArcGIS API
 const options = {

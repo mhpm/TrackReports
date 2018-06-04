@@ -1,5 +1,6 @@
 /* eslint-disable */ 
 import { loadModules } from 'esri-loader';
+var moment = require('moment');
 var esri = {
     data() {
       return {
@@ -143,9 +144,12 @@ var esri = {
           });
       },
     created(){
-      setTimeout(() => {
-        //this.GetAllVehicles()
-      }, 0);
+      // let start = Date.now();
+
+      // setTimeout(() => {
+      //   console.log(this.GetDateFromMS(Date.now() - start));
+      // }, 3000);
+
     },
     computed:{
       getCoords(){
@@ -162,6 +166,17 @@ var esri = {
       }
     },
     methods:{
+      GetDateFromMS(ms) {
+        var d, h, m, s;
+        s = Math.floor(ms / 1000);
+        m = Math.floor(s / 60);
+        s = s % 60;
+        h = Math.floor(m / 60);
+        m = m % 60;
+        d = Math.floor(h / 24);
+        h = h % 24;
+        return { dias: d, horas: h, minutos: m, segundos: s };
+      },
       GetAllVehicles(){
         var self = this;
         self.Vehicles = [];
@@ -174,11 +189,11 @@ var esri = {
             var geometries = [];
             var attributes = {};
             var tempVehicle = {};
-            self.getChoferes.forEach(function(chofer){ 
+            self.getChoferes.slice(1,3).forEach(function(chofer){ 
               geometries = [];
               features.forEach(function(element){
                 if(element.attributes.VEHICLE_ID == chofer.VEHICLE_ID){
-                    console.log(chofer.VEHICLE_ID);
+                    //console.log(chofer.VEHICLE_ID);
                     attributes = element.attributes;
                     geometries.push(element.geometry);
                   }
@@ -189,9 +204,13 @@ var esri = {
                 COLOR_VEHI: tempVehicle.attributes.COLOR_VEHI, 
                 PLACAS_VEH: tempVehicle.attributes.PLACAS_VEH,
                 TIPO_VEHI: tempVehicle.attributes.TIPO_VEHI,
-                picture: Math.floor((Math.random() * 10) + 1), 
+                picture: Math.floor((Math.random() * 100) + 1), 
                 nombre: chofer.text, vehicle: tempVehicle, 
-                currentCoordIndex: 0
+                currentCoordIndex: 0,
+                lastPlace:'',
+                check:[],
+                inSide: false,
+                outSide: null
               });
               self.$store.state.vehicles = self.Vehicles;
             });
@@ -206,10 +225,10 @@ var esri = {
         vehicle.currentCoordIndex = 0;
           setInterval(function() {
               self.SinglePointMove(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
-              self.Intersection(vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
-              //self.Track(self.trakRout[currentCoordIndex]);
+              //self.Intersection(vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
+              self.Intersection(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
-          }, 500);
+          }, 1000);
       },
       SinglePointMove(vehicle, geometry) {
         var self = this;
@@ -236,30 +255,66 @@ var esri = {
           self.getView.graphics.remove(vehicle.lastPosition);
           self.getView.graphics.add(newPosition);
       },
-      Intersection(carPosition){
-          this.queryCarIntersection.geometry = carPosition;
-          this.geoqueryTask.execute(this.queryCarIntersection).then(function(results){
-              //if(results.features != null)
-              console.log("Esta en: " + results.features[0].attributes.NOMBRE);
-          });
-
-          this.geoqueryTask.executeForCount(this.queryCarIntersection).then(function(results){
-              //console.log(results);
-          });
+      Intersection(vehicle, carPosition){
+        var self = this;
+        this.queryCarIntersection.geometry = carPosition;
+        this.geoqueryTask.execute(this.queryCarIntersection).then(function(results){
+          if(results.features.length > 0){
+            //console.log(results.features.length);
+            if(!vehicle.inSide){
+              let place = results.features[0].attributes.NOMBRE
+              let check = {
+                inDate: new Date(Date.now()),
+                outDate:null,
+                time: null,
+                Lugar: place
+              }
+              vehicle.check.push(check);
+              vehicle.lastPlace = place;
+              vehicle.inSide = true;
+              vehicle.outSide = false;
+              console.log(vehicle);
+            }
+          }else {
+            //console.log(results.features.length);
+            //console.log(vehicle.outSide);
+            if(!vehicle.outSide){
+              vehicle.check[vehicle.check.length - 1].outDate = new Date( Date.now());
+              let dateDiff = self.GetDateFromMS(vehicle.check[vehicle.check.length - 1].outDate - vehicle.check[vehicle.check.length - 1].inDate);
+              vehicle.check[vehicle.check.length - 1].time = dateDiff;
+              vehicle.inSide = false;
+              vehicle.outSide = true;
+              console.log(vehicle.check);
+            }
+          }
+        });
+          
+        this.geoqueryTask.executeForCount(this.queryCarIntersection).then(function(results){
+          //console.log(results);
+        });
       },
       TrackVehicle(VEHICLE_ID) {
         var self = this;
-        var vehicle = self.$store.state.vehicles.find(function(element) {
-          return element.VEHICLE_ID == VEHICLE_ID;
-        });
-        
-        self.vehicleSelected = vehicle;
-        self.vehicleSelected.isTraked = setInterval(function() { 
-          self.getView.goTo({
-            center: vehicle.currentPosition,
-            scale: 16000,
+        if(self.vehicleSelected.VEHICLE_ID != VEHICLE_ID){
+          console.log('diferente')
+          var vehicle = self.$store.state.vehicles.find(function(element) {
+            return element.VEHICLE_ID == VEHICLE_ID;
           });
-        }, 500);
+        
+          clearInterval(self.vehicleSelected.isTraked)
+          self.vehicleSelected = vehicle;
+          self.vehicleSelected.isTraked = setInterval(function() { 
+            self.getView.goTo({
+              center: vehicle.currentPosition,
+              scale: 16000,
+            });
+          }, 500);
+        }else{
+          console.log('mismo')
+        }
+
+      },
+      Report(){
 
       },
       Test(){
