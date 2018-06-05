@@ -1,6 +1,7 @@
 /* eslint-disable */ 
 import { loadModules } from 'esri-loader';
-var moment = require('moment');
+import DateFormat from 'dateformat'
+
 var esri = {
     data() {
       return {
@@ -49,7 +50,7 @@ var esri = {
       }
     },
     mounted() {
-        loadModules([
+      loadModules([
           'esri/Map',
           'esri/views/MapView',
           "esri/Graphic",
@@ -58,99 +59,86 @@ var esri = {
           "esri/layers/FeatureLayer",
           "vue"
           ])
-        .then(([Map, MapView, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
-    
-            this.NewGraphic = function(picture){ 
-              return new Graphic({
-                symbol: picture
-              })
-            };
+      .then(([Map, MapView, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
+          this.NewGraphic = function(picture){ 
+            return new Graphic({
+              symbol: picture
+            })
+          };
 
-            // Vehicles 
-
-    
-            // points layer
-            this.dotsLayer = new FeatureLayer({
-              url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
-            });
-    
-            // geocerca layer
-            this.cercasLayer = new FeatureLayer({
-              url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
-            });
-      
-            this.map = new Map({
-              basemap: "topo"
-            });
-    
-           // this.map.add(this.dotsLayer);
-            this.map.add(this.cercasLayer);
-    
-            this.$store.state.view = new MapView({
-              center: [-93.31210146474633, 18.061566162741393],
-              container: "viewDiv",
-              map: this.map,
-              zoom: 13
-            });
-    
-            // path for all geocercas
-            this.geoqueryTask = new QueryTask({
-              url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
-            });
-    
-            // query for detect intersection with the car
-            this.queryCarIntersection = new Query({
-              distance: 5,
-              units: "meters",
-              spatialRelationship: "intersects" // All features that intersect 100 mile buffer
-            });
-    
-            // path for dots layer
-            this.queryDotsPathTask = new QueryTask({
-              url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
-            });
-    
-            this.queryDots = new Query({
-              outFields: ["*"],
-              orderByFields: ["COLOR_VEHI"],
-              returnGeometry: true,
-              where: "1=1"
-            });
-
-            this.NewQuery = function() {
-              return new Query({
-                outFields: ["*"],
-                returnGeometry: true
-              })
-            }
-
-            // this.GetClickPosition = function () {
-            //     var self = this;
-            //     this.getView.on("click", function(event) {
-            //         event.stopPropagation(); // overwrite default click-for-popup behavior
-            
-            //         // Get the coordinates of the click on the view
-            //         var lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
-            //         var lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
-            //         var position = event.mapPoint;
-            //         self.clickPosition = position;
-            //     });
-            // }
-    
-    
-          }).catch(err => {
-            // handle any script or module loading errors
-            console.error(err);
+          // points layer
+          this.dotsLayer = new FeatureLayer({
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
           });
-      },
-    created(){
-      // let start = Date.now();
+          
+          // geocerca layer
+          this.cercasLayer = new FeatureLayer({
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
+          });
+          
+          this.map = new Map({
+            basemap: "topo"
+          });
+          
+          // this.map.add(this.dotsLayer);
+          this.map.add(this.cercasLayer);
+          
+          this.$store.state.view = new MapView({
+            center: [-93.31210146474633, 18.061566162741393],
+            container: "viewDiv",
+            map: this.map,
+            zoom: 13
+          });
+  
+          // path for all geocercas
+          this.geoqueryTask = new QueryTask({
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
+          });
+  
+          // query for detect intersection with the car
+          this.queryCarIntersection = new Query({
+            distance: 5,
+            units: "meters",
+            spatialRelationship: "intersects" // All features that intersect 100 mile buffer
+          });
+  
+          // path for dots layer
+          this.queryDotsPathTask = new QueryTask({
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
+          });
+  
+          this.queryDots = new Query({
+            outFields: ["*"],
+            orderByFields: ["COLOR_VEHI"],
+            returnGeometry: true,
+            where: "1=1"
+          });
 
-      // setTimeout(() => {
-      //   console.log(this.GetDateFromMS(Date.now() - start));
-      // }, 3000);
+          this.NewQuery = function() {
+            return new Query({
+              outFields: ["*"],
+              returnGeometry: true
+            })
+          }
 
+          // this.GetClickPosition = function () {
+          //     var self = this;
+          //     this.getView.on("click", function(event) {
+          //         event.stopPropagation(); // overwrite default click-for-popup behavior
+          
+          //         // Get the coordinates of the click on the view
+          //         var lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+          //         var lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+          //         var position = event.mapPoint;
+          //         self.clickPosition = position;
+          //     });
+          // }
+  
+  
+        })
+      .catch(err => { onsole.error(err); });
     },
+    created(){},
     computed:{
       getCoords(){
         return this.$store.state.coords;
@@ -175,13 +163,13 @@ var esri = {
         m = m % 60;
         d = Math.floor(h / 24);
         h = h % 24;
-        return { dias: d, horas: h, minutos: m, segundos: s };
+        return { d: d, h: h, m: m, s: s };
       },
       GetAllVehicles(){
         var self = this;
         self.Vehicles = [];
         var query = self.NewQuery();
-          query.orderByFields = ["VEHICLE_ID"],
+          query.orderByFields = ["POSI_ID"],
           query.where = "1=1";
 
           self.queryDotsPathTask.execute(query).then(function(result){
@@ -189,7 +177,7 @@ var esri = {
             var geometries = [];
             var attributes = {};
             var tempVehicle = {};
-            self.getChoferes.slice(1,3).forEach(function(chofer){ 
+            self.getChoferes.forEach(function(chofer){ 
               geometries = [];
               features.forEach(function(element){
                 if(element.attributes.VEHICLE_ID == chofer.VEHICLE_ID){
@@ -204,7 +192,7 @@ var esri = {
                 COLOR_VEHI: tempVehicle.attributes.COLOR_VEHI, 
                 PLACAS_VEH: tempVehicle.attributes.PLACAS_VEH,
                 TIPO_VEHI: tempVehicle.attributes.TIPO_VEHI,
-                picture: Math.floor((Math.random() * 100) + 1), 
+                picture: Math.floor((Math.random() * 50) + 1), 
                 nombre: chofer.text, vehicle: tempVehicle, 
                 currentCoordIndex: 0,
                 lastPlace:'',
@@ -267,24 +255,27 @@ var esri = {
                 inDate: new Date(Date.now()),
                 outDate:null,
                 time: null,
-                Lugar: place
+                lugar: place
               }
               vehicle.check.push(check);
               vehicle.lastPlace = place;
               vehicle.inSide = true;
               vehicle.outSide = false;
-              console.log(vehicle);
+              //console.log(vehicle);
             }
           }else {
             //console.log(results.features.length);
             //console.log(vehicle.outSide);
             if(!vehicle.outSide){
-              vehicle.check[vehicle.check.length - 1].outDate = new Date( Date.now());
+              let lastCheck = vehicle.check[vehicle.check.length - 1];
+              lastCheck.outDate = new Date( Date.now());
               let dateDiff = self.GetDateFromMS(vehicle.check[vehicle.check.length - 1].outDate - vehicle.check[vehicle.check.length - 1].inDate);
               vehicle.check[vehicle.check.length - 1].time = dateDiff;
               vehicle.inSide = false;
               vehicle.outSide = true;
-              console.log(vehicle.check);
+              lastCheck.inDate = DateFormat(lastCheck.inDate, 'dd/mmmm/yyyy - h:M:ss TT');
+              lastCheck.outDate = DateFormat(lastCheck.outDate, 'dd/mmmm/yyyy - h:M:ss TT');
+              //console.log(vehicle.check);
             }
           }
         });
@@ -296,7 +287,6 @@ var esri = {
       TrackVehicle(VEHICLE_ID) {
         var self = this;
         if(self.vehicleSelected.VEHICLE_ID != VEHICLE_ID){
-          console.log('diferente')
           var vehicle = self.$store.state.vehicles.find(function(element) {
             return element.VEHICLE_ID == VEHICLE_ID;
           });
@@ -309,9 +299,7 @@ var esri = {
               scale: 16000,
             });
           }, 500);
-        }else{
-          console.log('mismo')
-        }
+        }else{}
 
       },
       Report(){

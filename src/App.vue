@@ -1,5 +1,6 @@
 <template>
   <v-app id="inspire" dark >
+    <app-navigation />
     <v-content>
       <v-container fluid >
         <router-view/>

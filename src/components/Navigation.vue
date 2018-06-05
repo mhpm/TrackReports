@@ -1,17 +1,17 @@
 <template>
-<div>
-  <v-navigation-drawer v-model="drawer" fixed clipped app >
+  <div>
+    <v-navigation-drawer v-model="drawer" fixed clipped app >
       <v-list dense>
-        <v-list-tile v-for="item in items" :key="item.text" @click="">
-          <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>
-              {{ item.text }}
-            </v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+          <v-list-tile v-for="item in items" :key="item.text" @click="RouteTo(item.route)">
+            <v-list-tile-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>
+                {{ item.text }}
+              </v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
         <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
         <v-list>
           <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="">
@@ -35,6 +35,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
+
     <v-toolbar color="blue" dense fixed clipped-left app >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <!-- <v-icon class="mx-3">fab fa-youtube</v-icon> -->
@@ -53,6 +54,7 @@
         ></v-text-field>
       </v-layout> -->
     </v-toolbar>
+
     <v-flex v-if="cardDisplay" class="floatCard">
       <v-card>
         <v-card-title primary-title>
@@ -71,7 +73,7 @@
         </v-card-actions>
       </v-card>
     </v-flex>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -82,16 +84,16 @@ export default {
     cardDisplay:false,
     drawer: false,
     items: [
-        { icon: 'trending_up', text: 'Reporte General' },
-        { icon: 'subscriptions', text: 'Subscriptions' },
-        { icon: 'history', text: 'History' },
-        { icon: 'featured_play_list', text: 'Playlists' },
-        { icon: 'watch_later', text: 'Watch Later' }
+      { icon: 'map', text: 'Mapa', route:"mapa"},
+      { icon: 'trending_up', text: 'Reporte', route:"report"}
     ]
   }),
   methods:{
     StopTrack(){
       clearInterval(this.vehicleSelected.isTraked)
+    },
+    RouteTo(route){
+      this.$router.push({ name: route });
     }
   },
   computed:{

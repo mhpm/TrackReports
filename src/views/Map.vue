@@ -1,6 +1,5 @@
 <template>
 <v-layout>
-  <app-navigation />
   <v-layout>
     <v-flex>
       <v-card>
