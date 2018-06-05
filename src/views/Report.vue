@@ -1,57 +1,89 @@
 <template>
   <v-layout>
     <v-flex>
-      <v-card>
-         <v-card-title primary-title>
-           <div>
-            <h3 class="headline mb-0"><v-icon x-large>trending_up</v-icon> Reporte General</h3>
-           </div>
-          </v-card-title>
-         <v-list>
-          <v-list-group prepend-icon="directions_car" v-for="(item, index) in vehicles" :key="index">
-            <v-list-tile slot="activator">
-              <v-list-tile-title> Vehiculo: {{item.VEHICLE_ID}} - Placas: {{item.PLACAS_VEH}}</v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile>
-              <v-list-tile-avatar size="30">
-                <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt="">
-              </v-list-tile-avatar>
-              <v-list-tile-title>Chofer: {{item.nombre}}</v-list-tile-title>
-            </v-list-tile>
-            <v-list-group v-for="(subItem, index) in item.check" :key="index" sub-group no-action >
-              <v-list-tile slot="activator">
-                <v-list-tile-title>{{subItem.lugar}}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile>
-                <v-list-tile-sub-title>Entrada: {{subItem.inDate}}</v-list-tile-sub-title>
-              </v-list-tile>
-              <v-list-tile>
-                <v-list-tile-sub-title>Salida: {{subItem.outDate}}</v-list-tile-sub-title>
-              </v-list-tile>
-              <v-list-tile>
-                <v-list-tile-sub-title v-if="subItem.time != null">Tiempo: {{subItem.time.h}}:{{subItem.time.m}}:{{subItem.time.s}}</v-list-tile-sub-title>
-              </v-list-tile>
-            </v-list-group>
-          </v-list-group>
-        </v-list>
-      </v-card>
-       <!-- <v-expansion-panel>
-        <v-expansion-panel-content v-for="(item,i) in 5" :key="i">
+       <v-expansion-panel>
+        <v-expansion-panel-content v-for="(item, index) in vehicles" :key="index">
           <div slot="header">
-            <v-avatar size="30">  <img :src="`https://randomuser.me/api/portraits/men/10.jpg`" alt=""></v-avatar> Michelle
+            <v-avatar size="30">  <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt=""></v-avatar>
+            <span class="body-1 grey--text text--darken-1"> Chofer: {{item.nombre}} - Vehiculo: {{item.VEHICLE_ID}} - Placas: {{item.PLACAS_VEH}}</span>
           </div>
           <v-card>
-            <v-card-text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+            <v-card-text>
+                <v-data-table
+                    :headers="headers"
+                    :items="item.check"
+                    hide-actions
+                    class="elevation-1"
+                  >
+                    <template slot="items" slot-scope="props">
+                      <td class="text-left">{{ props.item.lugar }}</td>
+                      <td class="text-left">{{ props.item.inDate }}</td>
+                      <td class="text-left">{{ props.item.outDate }}</td>
+                      <td v-if="props.item.time != null" class="text-left"> {{props.item.time.h}}:{{props.item.time.m}}:{{props.item.time.s}}</td>
+                    </template>
+                </v-data-table>
+            </v-card-text>
           </v-card>
         </v-expansion-panel-content>
-      </v-expansion-panel> -->
+      </v-expansion-panel>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
   export default {
-    data: () => ({}),
+    data: () => ({
+      headers:[
+        {
+          text: "Lugar",
+          sortable: false
+        },
+        {
+          text: "Fecha Entrada",
+          sortable: false
+        },
+        {
+          text: "Fecha Salida",
+          sortable: false
+        },
+        {
+          text: "Tiempo",
+          sortable: false
+        }
+      ],
+      items:[
+        {
+          lugar:'La choca',
+          inDate: new Date(),
+          outDate: new Date(),
+          time: "0:0:5"
+        },
+        {
+          lugar:'Pemex',
+          inDate: new Date(),
+          outDate: new Date(),
+          time: "0:0:5"
+        },
+        {
+          lugar:'La choca',
+          inDate: new Date(),
+          outDate: new Date(),
+          time: "0:0:5"
+        },
+        {
+          lugar:'La choca',
+          inDate: new Date(),
+          outDate: new Date(),
+          time: "0:0:5"
+        },
+        {
+          lugar:'La choca',
+          inDate: new Date(),
+          outDate: new Date(),
+          time: "0:0:5"
+        }
+      ]
+    }),
     computed:{
         vehicles(){
             return this.$store.state.vehicles;

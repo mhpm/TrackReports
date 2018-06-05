@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     view: null,
+    map: null,
     choferes: [
       { id: 1, VEHICLE_ID: "v2kn:01008985SKYCCFA", text: "Joseph" },
       { id: 2, VEHICLE_ID: "v2kn:01008985SKYCCFB", text: "Juan" },

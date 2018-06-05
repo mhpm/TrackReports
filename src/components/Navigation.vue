@@ -38,7 +38,7 @@
 
     <v-toolbar color="blue" dense fixed clipped-left app >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <!-- <v-icon class="mx-3">fab fa-youtube</v-icon> -->
+      <img height="32" src="../assets/brand.png" alt="">
       <v-toolbar-title class="mr-5 align-center">
         <span class="title">Raestreo Vehicular</span>
       </v-toolbar-title>
@@ -68,7 +68,7 @@
           </div>
         </v-card-title>
         <v-card-actions>
-          <v-btn flat color="orange">Share</v-btn>
+          <!-- <v-btn flat color="orange">Share</v-btn> -->
           <v-btn flat color="orange" @click="StopTrack(), cardDisplay = !cardDisplay">Cerrar</v-btn>
         </v-card-actions>
       </v-card>

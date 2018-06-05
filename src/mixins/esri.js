@@ -60,12 +60,23 @@ var esri = {
           "vue"
           ])
       .then(([Map, MapView, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
-          this.NewGraphic = function(picture){ 
-            return new Graphic({
-              symbol: picture
-            })
-          };
+            
+        this.NewGraphic = function(picture){
+          var choferPich = {
+            type: "picture-marker",
+            url: `https://randomuser.me/api/portraits/men/${picture}.jpg`,
+            width: "32px",
+            height: "32px"
+          }
 
+          return new Graphic({
+            symbol: choferPich
+          })
+        };
+
+        
+        if(this.$store.state.view == null){
+          
           // points layer
           this.dotsLayer = new FeatureLayer({
             url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
@@ -76,50 +87,53 @@ var esri = {
             url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
           });
           
-          this.map = new Map({
+          this.$store.state.map = new Map({
             basemap: "topo"
           });
           
           // this.map.add(this.dotsLayer);
-          this.map.add(this.cercasLayer);
+          this.$store.state.map.add(this.cercasLayer);
           
           this.$store.state.view = new MapView({
             center: [-93.31210146474633, 18.061566162741393],
             container: "viewDiv",
-            map: this.map,
+            map: this.$store.state.map,
             zoom: 13
           });
-  
-          // path for all geocercas
-          this.geoqueryTask = new QueryTask({
-            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
-          });
-  
-          // query for detect intersection with the car
-          this.queryCarIntersection = new Query({
-            distance: 5,
-            units: "meters",
-            spatialRelationship: "intersects" // All features that intersect 100 mile buffer
-          });
-  
-          // path for dots layer
-          this.queryDotsPathTask = new QueryTask({
-            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
-          });
-  
-          this.queryDots = new Query({
-            outFields: ["*"],
-            orderByFields: ["COLOR_VEHI"],
-            returnGeometry: true,
-            where: "1=1"
-          });
+        }else{
+          this.$store.state.view.container = "viewDiv";
+        }
 
-          this.NewQuery = function() {
-            return new Query({
-              outFields: ["*"],
-              returnGeometry: true
-            })
-          }
+        // path for all geocercas
+        this.geoqueryTask = new QueryTask({
+          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
+        });
+
+        // query for detect intersection with the car
+        this.queryCarIntersection = new Query({
+          distance: 5,
+          units: "meters",
+          spatialRelationship: "intersects" // All features that intersect 100 mile buffer
+        });
+
+        // path for dots layer
+        this.queryDotsPathTask = new QueryTask({
+          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
+        });
+
+        this.queryDots = new Query({
+          outFields: ["*"],
+          orderByFields: ["COLOR_VEHI"],
+          returnGeometry: true,
+          where: "1=1"
+        });
+
+        this.NewQuery = function() {
+          return new Query({
+            outFields: ["*"],
+            returnGeometry: true
+          })
+        }
 
           // this.GetClickPosition = function () {
           //     var self = this;
@@ -136,7 +150,7 @@ var esri = {
   
   
         })
-      .catch(err => { onsole.error(err); });
+      .catch(err => { console.error(err); });
     },
     created(){},
     computed:{
@@ -221,22 +235,22 @@ var esri = {
       SinglePointMove(vehicle, geometry) {
         var self = this;
         vehicle.lastPosition = vehicle.currentPosition;
-        var newPosition = this.NewGraphic(self.pickUpPic);
-        
-        switch(vehicle.COLOR_VEHI){
-          case "Rojo":
-            newPosition = this.NewGraphic(self.camionetaPic);
-          break;
-          case "Verde":
-            newPosition = this.NewGraphic(self.truckPic);
-          break;
-          case "Gris":
-            newPosition = this.NewGraphic(self.dompePic);
-          break;
-          case "Blanco":
-            newPosition = this.NewGraphic(self.pickUpPic);
-          break;
-        }
+        let newPosition = self.NewGraphic(vehicle.picture);
+        // var newPosition = this.NewGraphic(self.pickUpPic);      
+        // switch(vehicle.COLOR_VEHI){
+        //   case "Rojo":
+        //     newPosition = this.NewGraphic(self.camionetaPic);
+        //   break;
+        //   case "Verde":
+        //     newPosition = this.NewGraphic(self.truckPic);
+        //   break;
+        //   case "Gris":
+        //     newPosition = this.NewGraphic(self.dompePic);
+        //   break;
+        //   case "Blanco":
+        //     newPosition = this.NewGraphic(self.pickUpPic);
+        //   break;
+        // }
        
           newPosition.geometry = geometry;
           vehicle.currentPosition = newPosition;
