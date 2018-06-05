@@ -5,7 +5,7 @@
         <v-expansion-panel-content v-for="(item, index) in vehicles" :key="index">
           <div slot="header">
             <v-avatar size="30">  <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt=""></v-avatar>
-            <span class="body-1 grey--text text--darken-1"> Chofer: {{item.nombre}} - Vehiculo: {{item.VEHICLE_ID}} - Placas: {{item.PLACAS_VEH}}</span>
+            <span class="body-1 grey--text text--lighten-1"> Chofer: {{item.nombre}} - Vehiculo: {{item.VEHICLE_ID}} - Placas: {{item.PLACAS_VEH}}</span>
           </div>
           <v-card>
             <v-card-text>

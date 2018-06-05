@@ -62,15 +62,15 @@ var esri = {
       .then(([Map, MapView, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
             
         this.NewGraphic = function(picture){
-          var choferPich = {
-            type: "picture-marker",
-            url: `https://randomuser.me/api/portraits/men/${picture}.jpg`,
-            width: "32px",
-            height: "32px"
-          }
+          // var choferPich = {
+          //   type: "picture-marker",
+          //   url: `https://randomuser.me/api/portraits/men/${picture}.jpg`,
+          //   width: "32px",
+          //   height: "32px"
+          // }
 
           return new Graphic({
-            symbol: choferPich
+            symbol: picture
           })
         };
 
@@ -91,7 +91,7 @@ var esri = {
             basemap: "topo"
           });
           
-          // this.map.add(this.dotsLayer);
+          this.$store.state.map.add(this.dotsLayer);
           this.$store.state.map.add(this.cercasLayer);
           
           this.$store.state.view = new MapView({
@@ -230,27 +230,27 @@ var esri = {
               //self.Intersection(vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               self.Intersection(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
-          }, 1000);
+          }, 3000);
       },
       SinglePointMove(vehicle, geometry) {
         var self = this;
         vehicle.lastPosition = vehicle.currentPosition;
-        let newPosition = self.NewGraphic(vehicle.picture);
-        // var newPosition = this.NewGraphic(self.pickUpPic);      
-        // switch(vehicle.COLOR_VEHI){
-        //   case "Rojo":
-        //     newPosition = this.NewGraphic(self.camionetaPic);
-        //   break;
-        //   case "Verde":
-        //     newPosition = this.NewGraphic(self.truckPic);
-        //   break;
-        //   case "Gris":
-        //     newPosition = this.NewGraphic(self.dompePic);
-        //   break;
-        //   case "Blanco":
-        //     newPosition = this.NewGraphic(self.pickUpPic);
-        //   break;
-        // }
+        //let newPosition = self.NewGraphic(vehicle.picture);
+        var newPosition = this.NewGraphic(self.pickUpPic);      
+        switch(vehicle.COLOR_VEHI){
+          case "Rojo":
+            newPosition = this.NewGraphic(self.camionetaPic);
+          break;
+          case "Verde":
+            newPosition = this.NewGraphic(self.truckPic);
+          break;
+          case "Gris":
+            newPosition = this.NewGraphic(self.dompePic);
+          break;
+          case "Blanco":
+            newPosition = this.NewGraphic(self.pickUpPic);
+          break;
+        }
        
           newPosition.geometry = geometry;
           vehicle.currentPosition = newPosition;
@@ -278,8 +278,6 @@ var esri = {
               //console.log(vehicle);
             }
           }else {
-            //console.log(results.features.length);
-            //console.log(vehicle.outSide);
             if(!vehicle.outSide){
               let lastCheck = vehicle.check[vehicle.check.length - 1];
               lastCheck.outDate = new Date( Date.now());
@@ -304,15 +302,21 @@ var esri = {
           var vehicle = self.$store.state.vehicles.find(function(element) {
             return element.VEHICLE_ID == VEHICLE_ID;
           });
-        
-          clearInterval(self.vehicleSelected.isTraked)
+
           self.vehicleSelected = vehicle;
-          self.vehicleSelected.isTraked = setInterval(function() { 
-            self.getView.goTo({
-              center: vehicle.currentPosition,
-              scale: 16000,
-            });
-          }, 500);
+          self.getView.goTo({
+            center: vehicle.currentPosition,
+            scale: 16000,
+          });
+        
+          // clearInterval(self.vehicleSelected.isTraked)
+          // self.vehicleSelected = vehicle;
+          // self.vehicleSelected.isTraked = setInterval(function() { 
+          //   self.getView.goTo({
+          //     center: vehicle.currentPosition,
+          //     scale: 16000,
+          //   });
+          // }, 5000);
         }else{}
 
       },
