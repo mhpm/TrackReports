@@ -6,7 +6,7 @@
           <v-card-text style="height: 90vh; position: relative">
             <div id="viewDiv" class="viewDiv"></div>
             <v-btn style="bottom: 50px; right: 50px" absolute dark bottom right color="red" @click="GetAllVehicles" >
-              <v-icon></v-icon> Inicial Simulacion
+              <v-icon></v-icon> Iniciar Rastreo
             </v-btn>
           </v-card-text>
         </v-card>
