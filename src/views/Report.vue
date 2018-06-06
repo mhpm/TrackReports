@@ -5,7 +5,7 @@
         <v-expansion-panel-content v-for="(item, index) in vehicles" :key="index">
           <div slot="header">
             <v-avatar size="30">  <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt=""></v-avatar>
-            <span class="body-1 grey--text text--lighten-1"> Chofer: {{item.nombre}} - Vehiculo: {{item.VEHICLE_ID}} - Placas: {{item.PLACAS_VEH}}</span>
+            <span class="body-1"> {{item.nombre}}, Placas: {{item.PLACAS_VEH}}</span>
           </div>
           <v-card>
             <v-card-text>
@@ -17,8 +17,8 @@
                   >
                     <template slot="items" slot-scope="props">
                       <td class="text-left">{{ props.item.lugar }}</td>
-                      <td class="text-left">{{ props.item.inDate }}</td>
-                      <td class="text-left">{{ props.item.outDate }}</td>
+                      <td class="text-left">{{ props.item.fechaEntrada }}</td>
+                      <td class="text-left">{{ props.item.fechaSalida }}</td>
                       <td v-if="props.item.time != null" class="text-left"> {{props.item.time.h}}:{{props.item.time.m}}:{{props.item.time.s}}</td>
                     </template>
                 </v-data-table>

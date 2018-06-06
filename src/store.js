@@ -8,10 +8,10 @@ export default new Vuex.Store({
     view: null,
     map: null,
     choferes: [
-      { id: 1, VEHICLE_ID: "v2kn:01008985SKYCCFA", text: "Joseph" },
-      { id: 2, VEHICLE_ID: "v2kn:01008985SKYCCFB", text: "Juan" },
-      { id: 3, VEHICLE_ID: "v2kn:01008985SKYCCFC", text: "Pedro" },
-      { id: 4, VEHICLE_ID: "v2kn:01008985SKYCCFD", text: "Carlos" }
+      { id: 1, VEHICLE_ID: "v2kn:01008985SKYCCFA", text: "Joseph Manzanares" },
+      { id: 2, VEHICLE_ID: "v2kn:01008985SKYCCFB", text: "Juan Emerick" },
+      { id: 3, VEHICLE_ID: "v2kn:01008985SKYCCFC", text: "Pedro Escobar" },
+      { id: 4, VEHICLE_ID: "v2kn:01008985SKYCCFD", text: "Carlos Sanchez" }
       // { id: 5, picture: 78, color: "Gris", text: "MKBHD" }
     ],
     coords: [],

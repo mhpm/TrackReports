@@ -1,6 +1,19 @@
 /* eslint-disable */ 
 import { loadModules } from 'esri-loader';
 import DateFormat from 'dateformat'
+  DateFormat.i18n = {
+    dayNames: [
+        'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',
+        'Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'viernes', 'Sabado'
+    ],
+    monthNames: [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Augosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ],
+    timeNames: [
+        'a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM'
+    ]
+  };
 
 var esri = {
     data() {
@@ -91,7 +104,7 @@ var esri = {
             basemap: "topo"
           });
           
-          this.$store.state.map.add(this.dotsLayer);
+          //this.$store.state.map.add(this.dotsLayer);
           this.$store.state.map.add(this.cercasLayer);
           
           this.$store.state.view = new MapView({
@@ -227,10 +240,9 @@ var esri = {
         vehicle.currentCoordIndex = 0;
           setInterval(function() {
               self.SinglePointMove(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
-              //self.Intersection(vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               self.Intersection(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
-          }, 3000);
+          }, 2000);
       },
       SinglePointMove(vehicle, geometry) {
         var self = this;
@@ -262,11 +274,12 @@ var esri = {
         this.queryCarIntersection.geometry = carPosition;
         this.geoqueryTask.execute(this.queryCarIntersection).then(function(results){
           if(results.features.length > 0){
-            //console.log(results.features.length);
             if(!vehicle.inSide){
               let place = results.features[0].attributes.NOMBRE
               let check = {
                 inDate: new Date(Date.now()),
+                fechaEntrada: DateFormat(new Date(Date.now()), 'dddd dd/mmmm/yyyy - HH:MM:ss TT'),
+                fechaSalida: null,
                 outDate:null,
                 time: null,
                 lugar: place
@@ -275,25 +288,19 @@ var esri = {
               vehicle.lastPlace = place;
               vehicle.inSide = true;
               vehicle.outSide = false;
-              //console.log(vehicle);
             }
           }else {
             if(!vehicle.outSide){
               let lastCheck = vehicle.check[vehicle.check.length - 1];
-              lastCheck.outDate = new Date( Date.now());
+              lastCheck.outDate = new Date(Date.now());
+              lastCheck.fechaSalida = DateFormat(lastCheck.outDate, 'dddd dd/mmmm/yyyy - HH:MM:ss TT');
               let dateDiff = self.GetDateFromMS(vehicle.check[vehicle.check.length - 1].outDate - vehicle.check[vehicle.check.length - 1].inDate);
               vehicle.check[vehicle.check.length - 1].time = dateDiff;
               vehicle.inSide = false;
               vehicle.outSide = true;
-              lastCheck.inDate = DateFormat(lastCheck.inDate, 'dd/mmmm/yyyy - h:M:ss TT');
-              lastCheck.outDate = DateFormat(lastCheck.outDate, 'dd/mmmm/yyyy - h:M:ss TT');
-              //console.log(vehicle.check);
+              // Save on Database
             }
           }
-        });
-          
-        this.geoqueryTask.executeForCount(this.queryCarIntersection).then(function(results){
-          //console.log(results);
         });
       },
       TrackVehicle(VEHICLE_ID) {
