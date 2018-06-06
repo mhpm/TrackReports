@@ -66,13 +66,14 @@ var esri = {
       loadModules([
           'esri/Map',
           'esri/views/MapView',
+          "esri/widgets/BasemapToggle",
           "esri/Graphic",
           "esri/tasks/QueryTask",
           "esri/tasks/support/Query",
           "esri/layers/FeatureLayer",
           "vue"
           ])
-      .then(([Map, MapView, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
+      .then(([Map, MapView, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
             
         this.NewGraphic = function(picture){
           // var choferPich = {
@@ -113,6 +114,15 @@ var esri = {
             map: this.$store.state.map,
             zoom: 13
           });
+
+          var toggle = new BasemapToggle({
+            // 2 - Set properties
+            view: this.$store.state.view, // view that provides access to the map's 'topo' basemap
+            nextBasemap: "hybrid" // allows for toggling to the 'hybrid' basemap
+          });
+
+          this.$store.state.view.ui.add(toggle, "bottom-left");
+
         }else{
           this.$store.state.view.container = "viewDiv";
         }
@@ -218,14 +228,17 @@ var esri = {
                 VEHICLE_ID: tempVehicle.attributes.VEHICLE_ID, 
                 COLOR_VEHI: tempVehicle.attributes.COLOR_VEHI, 
                 PLACAS_VEH: tempVehicle.attributes.PLACAS_VEH,
-                TIPO_VEHI: tempVehicle.attributes.TIPO_VEHI,
-                picture: Math.floor((Math.random() * 50) + 1), 
-                nombre: chofer.text, vehicle: tempVehicle, 
+                TIPO_VEHI: chofer.type,
+                picture: Math.floor((Math.random() * 50) + 1),
+                img: chofer.img, 
+                nombre: chofer.text,
+                vehicle: tempVehicle, 
                 currentCoordIndex: 0,
                 lastPlace:'',
                 check:[],
                 inSide: false,
-                outSide: null
+                outSide: null,
+                path:[]
               });
               self.$store.state.vehicles = self.Vehicles;
             });
@@ -266,6 +279,7 @@ var esri = {
        
           newPosition.geometry = geometry;
           vehicle.currentPosition = newPosition;
+          vehicle.path.push(vehicle.lastPosition);
           self.getView.graphics.remove(vehicle.lastPosition);
           self.getView.graphics.add(newPosition);
       },

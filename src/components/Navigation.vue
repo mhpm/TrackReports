@@ -14,14 +14,14 @@
           </v-list-tile>
         <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
         <v-list>
-          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="">
+          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="Imagen(item.img)">
             <v-list-tile-avatar>
-              <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt="">
+              <img :src="require(`../assets/${item.img}.jpg`)" alt="">
             </v-list-tile-avatar>
             <v-list-tile-title v-text="item.nombre" style="cursor: pointer;" @click="TrackVehicle(item.VEHICLE_ID), cardDisplay? cardDisplay=true:cardDisplay=true"></v-list-tile-title>
           </v-list-tile>
         </v-list>
-        <v-list-tile class="mt-3" @click="">
+        <!-- <v-list-tile class="mt-3" @click="">
           <v-list-tile-action>
             <v-icon color="grey darken-1">add_circle_outline</v-icon>
           </v-list-tile-action>
@@ -32,7 +32,7 @@
             <v-icon color="grey darken-1">settings</v-icon>
           </v-list-tile-action>
           <v-list-tile-title class="grey--text text--darken-1">Manage Subscriptions</v-list-tile-title>
-        </v-list-tile>
+        </v-list-tile> -->
       </v-list>
     </v-navigation-drawer>
 
@@ -59,12 +59,15 @@
       <v-card>
         <v-card-title primary-title>
            <v-list-tile-avatar>
-              <img :src="`https://randomuser.me/api/portraits/men/${vehicleSelected.picture}.jpg`" alt="">
+              <img :src="require(`../assets/${vehicleSelected.img}.jpg`)" alt="">
             </v-list-tile-avatar>
           <div>
             <h3 class="headline mb-0">Placas: {{vehicleSelected.PLACAS_VEH}}</h3>
-            <div>Chofer: {{vehicleSelected.nombre}}<br>
-                Color del Vehiculo: {{vehicleSelected.COLOR_VEHI}}</div>
+            <div>
+              Chofer: {{vehicleSelected.nombre}}<br>
+              Color del Vehiculo: {{vehicleSelected.COLOR_VEHI}} <br>
+              Tipo de vehiculo: {{vehicleSelected.TIPO_VEHI}}
+            </div>
           </div>
         </v-card-title>
         <v-card-actions>
@@ -85,7 +88,7 @@ export default {
     drawer: false,
     items: [
       { icon: 'map', text: 'Mapa', route:"mapa"},
-      { icon: 'trending_up', text: 'Reporte', route:"report"}
+      { icon: 'assignment_turned_in', text: 'Reporte', route:"report"}
     ]
   }),
   methods:{
@@ -94,6 +97,9 @@ export default {
     },
     RouteTo(route){
       this.$router.push({ name: route });
+    },
+    Imagen(img){
+      console.log(img)
     }
   },
   computed:{
@@ -112,7 +118,7 @@ export default {
 .floatCard {
   position: fixed;
   top: 100px;
-  right: 50px;
+  right:50px;
   width: auto;
   z-index: 1;
 }
