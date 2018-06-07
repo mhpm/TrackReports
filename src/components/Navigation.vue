@@ -14,7 +14,7 @@
           </v-list-tile>
         <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
         <v-list>
-          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="Imagen(item.img)">
+          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="">
             <v-list-tile-avatar>
               <img :src="require(`../assets/${item.img}.jpg`)" alt="">
             </v-list-tile-avatar>
@@ -40,7 +40,7 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <img height="32" src="../assets/brand.png" alt="">
       <v-toolbar-title class="mr-5 align-center">
-        <span class="title">Raestreo Vehicular</span>
+        <span class="title">Monitoreo del programa operativo semanal</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <!-- <v-layout row align-center style="max-width: 650px">
@@ -72,7 +72,7 @@
         </v-card-title>
         <v-card-actions>
           <!-- <v-btn flat color="orange">Share</v-btn> -->
-          <v-btn flat color="orange" @click="StopTrack(), cardDisplay = !cardDisplay">Cerrar</v-btn>
+          <v-btn flat color="orange" @click="RemovePathHistory(), cardDisplay = !cardDisplay">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-flex>
@@ -97,9 +97,6 @@ export default {
     },
     RouteTo(route){
       this.$router.push({ name: route });
-    },
-    Imagen(img){
-      console.log(img)
     }
   },
   computed:{

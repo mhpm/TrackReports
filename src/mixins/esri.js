@@ -22,39 +22,36 @@ var esri = {
         coords:[],
         markerSymbol: {
           type: "simple-marker",
-          color: [226, 119, 40],
+          color: [255, 255, 0],
+          width: "8px",
+          height: "8px"
         },
         camionetaPic: {
           type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
           url: "https://image.flaticon.com/icons/svg/296/296211.svg",
-          width: "32px",
-          height: "32px"
+          width: "40px",
+          height: "40px"
         },
         pickUpPic: {
           type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
           url: "https://image.flaticon.com/icons/svg/517/517554.svg",
-          width: "32px",
-          height: "32px"
+          width: "40px",
+          height: "40px"
         },
         dompePic: {
           type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
           url: "https://image.flaticon.com/icons/svg/324/324231.svg",
-          width: "32px",
-          height: "32px"
+          width: "40px",
+          height: "40px"
         },
         truckPic: {
           type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
           url: "https://image.flaticon.com/icons/svg/296/296217.svg",
-          width: "32px",
-          height: "32px"
+          width: "40px",
+          height: "40px"
         },
         Vehicles:[],
-        vehicleSelected:{
-          attributes:{},
-          geometries:[],
-          lastPosition:null,
-          isTraked:null
-        },
+        vehicleSelected:null,
         geoqueryTask: null,
         queryCarIntersection: null,
         queryDotsPathTask: null,
@@ -85,6 +82,12 @@ var esri = {
 
           return new Graphic({
             symbol: picture
+          })
+        };
+
+        this.NewGraphicPoint = function(){
+          return new Graphic({
+            symbol: markerSymbol
           })
         };
 
@@ -156,6 +159,13 @@ var esri = {
             outFields: ["*"],
             returnGeometry: true
           })
+        }
+
+        this.NewPopUp = function(){
+          return  new PopupTemplate({
+            title: "Results title",
+            content: "Results: Attributes"
+          });
         }
 
           // this.GetClickPosition = function () {
@@ -238,7 +248,8 @@ var esri = {
                 check:[],
                 inSide: false,
                 outSide: null,
-                path:[]
+                path:[],
+                isTraked: null
               });
               self.$store.state.vehicles = self.Vehicles;
             });
@@ -276,12 +287,25 @@ var esri = {
             newPosition = this.NewGraphic(self.pickUpPic);
           break;
         }
+         // newPosition.popup = this.NewPopUp();
        
           newPosition.geometry = geometry;
           vehicle.currentPosition = newPosition;
           vehicle.path.push(vehicle.lastPosition);
           self.getView.graphics.remove(vehicle.lastPosition);
           self.getView.graphics.add(newPosition);
+      },
+      VehiclePathHistory() {
+        var self = this;  
+        console.log('si');
+        self.vehicleSelected.pathHistory = [];
+        self.vehicleSelected.path.forEach(function(graphic){
+          if(graphic != undefined){
+            graphic.symbol = self.markerSymbol;
+            self.vehicleSelected.pathHistory.push(graphic);
+            self.getView.graphics.add(graphic);
+          }
+        });
       },
       Intersection(vehicle, carPosition){
         var self = this;
@@ -319,27 +343,38 @@ var esri = {
       },
       TrackVehicle(VEHICLE_ID) {
         var self = this;
-        if(self.vehicleSelected.VEHICLE_ID != VEHICLE_ID){
+        if(self.vehicleSelected == null || self.vehicleSelected.VEHICLE_ID != VEHICLE_ID){
           var vehicle = self.$store.state.vehicles.find(function(element) {
             return element.VEHICLE_ID == VEHICLE_ID;
           });
+
+          if(self.vehicleSelected != null){
+            console.log('clear traked');
+            clearInterval(self.vehicleSelected.isTraked);
+            self.RemovePathHistory();
+          }
 
           self.vehicleSelected = vehicle;
           self.getView.goTo({
             center: vehicle.currentPosition,
             scale: 16000,
           });
-        
-          // clearInterval(self.vehicleSelected.isTraked)
-          // self.vehicleSelected = vehicle;
-          // self.vehicleSelected.isTraked = setInterval(function() { 
-          //   self.getView.goTo({
-          //     center: vehicle.currentPosition,
-          //     scale: 16000,
-          //   });
-          // }, 5000);
-        }else{}
-
+          
+          self.vehicleSelected = vehicle;
+          self.vehicleSelected.isTraked = setInterval(function() { 
+            self.VehiclePathHistory();
+          }, 2000);
+        }
+      },
+      RemovePathHistory(){
+        var self = this;
+        self.vehicleSelected.path.forEach(function(graphic){
+          if(graphic != undefined){
+            self.getView.graphics.remove(graphic);
+          }
+        });
+        clearInterval(self.vehicleSelected.isTraked);
+        self.vehicleSelected = null;
       },
       Report(){
 
