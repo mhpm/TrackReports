@@ -27,25 +27,25 @@ var esri = {
           height: "8px"
         },
         camionetaPic: {
-          type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+          type: "picture-marker",
           url: "https://image.flaticon.com/icons/svg/296/296211.svg",
           width: "40px",
           height: "40px"
         },
         pickUpPic: {
-          type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+          type: "picture-marker",
           url: "https://image.flaticon.com/icons/svg/517/517554.svg",
           width: "40px",
           height: "40px"
         },
         dompePic: {
-          type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+          type: "picture-marker",
           url: "https://image.flaticon.com/icons/svg/324/324231.svg",
           width: "40px",
           height: "40px"
         },
         truckPic: {
-          type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+          type: "picture-marker",  
           url: "https://image.flaticon.com/icons/svg/296/296217.svg",
           width: "40px",
           height: "40px"
@@ -63,6 +63,7 @@ var esri = {
       loadModules([
           'esri/Map',
           'esri/views/MapView',
+          "esri/WebMap",
           "esri/widgets/BasemapToggle",
           "esri/Graphic",
           "esri/tasks/QueryTask",
@@ -70,20 +71,36 @@ var esri = {
           "esri/layers/FeatureLayer",
           "vue"
           ])
-      .then(([Map, MapView, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
+      .then(([Map, MapView, WebMap, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
             
         this.NewGraphic = function(picture){
-          // var choferPich = {
-          //   type: "picture-marker",
-          //   url: `https://randomuser.me/api/portraits/men/${picture}.jpg`,
-          //   width: "32px",
-          //   height: "32px"
-          // }
+          var choferPich = {
+            type: "picture-marker",
+            url: require(`../assets/${picture}.png`),
+            width: "32px",
+            height: "32px"
+          }
 
           return new Graphic({
-            symbol: picture
-          })
+            symbol: choferPich,
+            popupTemplate: {
+              title: "Informacion",
+              content: []
+            },
+            outFields: ["*"]
+          });
         };
+
+      this.NewGraphicLine = function(){ 
+        let lineSymbol = {
+          type: "simple-line", 
+          color: [255, 0, 0],
+          width: 2
+        }
+        return new Graphic({
+          symbol: lineSymbol
+        });
+      };
 
         this.NewGraphicPoint = function(){
           return new Graphic({
@@ -96,32 +113,37 @@ var esri = {
           
           // points layer
           this.dotsLayer = new FeatureLayer({
-            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/2?token=MnKdg3e5qgrvIjCmatideNLBQRsw0wpOFV2OqwHkoUkXPFkyN2UUip4AfO63Jzn_yoVmWMOO_Q7vblnf-Zwt6GxHTf2FtuYhDCs4yZUtiTfqv4ffqxtu7fNEZMoi9LfX_Ar37BR20oUeMd6bv0_Pov8_eRdJOv1HRAaUkdg44ov6pcWfHDWm4saC3EgNKqVgtKUHglW5A9YRNpxl-asgh1dzl4ovrMutKelb2Gv86OZn8dgzih2ox8A4ugO8gqqK"
           });
           
           // geocerca layer
           this.cercasLayer = new FeatureLayer({
-            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
+            url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/3?token=MnKdg3e5qgrvIjCmatideNLBQRsw0wpOFV2OqwHkoUkXPFkyN2UUip4AfO63Jzn_yoVmWMOO_Q7vblnf-Zwt6GxHTf2FtuYhDCs4yZUtiTfqv4ffqxtu7fNEZMoi9LfX_Ar37BR20oUeMd6bv0_Pov8_eRdJOv1HRAaUkdg44ov6pcWfHDWm4saC3EgNKqVgtKUHglW5A9YRNpxl-asgh1dzl4ovrMutKelb2Gv86OZn8dgzih2ox8A4ugO8gqqK"
           });
           
-          this.$store.state.map = new Map({
-            basemap: "topo"
-          });
+          // this.$store.state.map = new Map({
+          //   basemap: "topo"
+          // });
           
           //this.$store.state.map.add(this.dotsLayer);
-          this.$store.state.map.add(this.cercasLayer);
+          //this.$store.state.map.add(this.cercasLayer);
+
+          this.$store.state.map = new WebMap({
+            portalItem: { // autocasts as new PortalItem()
+              id: "ff80ff0633a14c13bb6e5678ed703da0"
+            }
+          });
           
           this.$store.state.view = new MapView({
             center: [-93.31210146474633, 18.061566162741393],
             container: "viewDiv",
-            map: this.$store.state.map,
-            zoom: 13
+            map: this.$store.state.map
           });
 
           var toggle = new BasemapToggle({
             // 2 - Set properties
             view: this.$store.state.view, // view that provides access to the map's 'topo' basemap
-            nextBasemap: "hybrid" // allows for toggling to the 'hybrid' basemap
+            nextBasemap: "streets" // allows for toggling to the 'hybrid' basemap
           });
 
           this.$store.state.view.ui.add(toggle, "bottom-left");
@@ -132,7 +154,7 @@ var esri = {
 
         // path for all geocercas
         this.geoqueryTask = new QueryTask({
-          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/1"
+          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/3?token=MnKdg3e5qgrvIjCmatideNLBQRsw0wpOFV2OqwHkoUkXPFkyN2UUip4AfO63Jzn_yoVmWMOO_Q7vblnf-Zwt6GxHTf2FtuYhDCs4yZUtiTfqv4ffqxtu7fNEZMoi9LfX_Ar37BR20oUeMd6bv0_Pov8_eRdJOv1HRAaUkdg44ov6pcWfHDWm4saC3EgNKqVgtKUHglW5A9YRNpxl-asgh1dzl4ovrMutKelb2Gv86OZn8dgzih2ox8A4ugO8gqqK"
         });
 
         // query for detect intersection with the car
@@ -266,46 +288,63 @@ var esri = {
               self.SinglePointMove(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               self.Intersection(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
+              if(vehicle.currentCoordIndex == 0)
+                vehicle.path = [];
           }, 2000);
       },
       SinglePointMove(vehicle, geometry) {
         var self = this;
         vehicle.lastPosition = vehicle.currentPosition;
-        //let newPosition = self.NewGraphic(vehicle.picture);
-        var newPosition = this.NewGraphic(self.pickUpPic);      
-        switch(vehicle.COLOR_VEHI){
-          case "Rojo":
-            newPosition = this.NewGraphic(self.camionetaPic);
+        var newPosition = null;    
+        switch(vehicle.TIPO_VEHI){
+          case "Nitrógeno":
+            newPosition = self.NewGraphic("pipa");
           break;
-          case "Verde":
-            newPosition = this.NewGraphic(self.truckPic);
+          case "Líneas de Acero":
+            newPosition = self.NewGraphic("carga");
           break;
-          case "Gris":
-            newPosition = this.NewGraphic(self.dompePic);
+          case "Material Eléctrico":
+            newPosition = self.NewGraphic("truck");
           break;
-          case "Blanco":
-            newPosition = this.NewGraphic(self.pickUpPic);
+          case "Aceite":
+            newPosition = self.NewGraphic("carga");;
           break;
         }
-         // newPosition.popup = this.NewPopUp();
-       
-          newPosition.geometry = geometry;
-          vehicle.currentPosition = newPosition;
-          vehicle.path.push(vehicle.lastPosition);
-          self.getView.graphics.remove(vehicle.lastPosition);
-          self.getView.graphics.add(newPosition);
-      },
-      VehiclePathHistory() {
-        var self = this;  
-        console.log('si');
-        self.vehicleSelected.pathHistory = [];
-        self.vehicleSelected.path.forEach(function(graphic){
-          if(graphic != undefined){
-            graphic.symbol = self.markerSymbol;
-            self.vehicleSelected.pathHistory.push(graphic);
-            self.getView.graphics.add(graphic);
+
+        var fields = [
+          {
+            type: "fields",
+            fieldInfos:[{
+              fieldName: "PLACAS_VEH",
+              visible: true,
+              label: "PLACAS"
+            }]
+          },
+          {
+            type: "fields",
+            fieldInfos:[{
+              fieldName: "TIPO_VEHI",
+              visible: true,
+              label: "Tipo de Transporte"
+            }]
+          },
+          {
+            type: "fields",
+            fieldInfos:[{
+              fieldName: "NOMBRE",
+              visible: true,
+              label: "Chofer"
+            }]
           }
-        });
+        ];
+        vehicle.vehicle.attributes.NOMBRE = vehicle.nombre;
+        newPosition.popupTemplate.content = fields;
+        newPosition.attributes = vehicle.vehicle.attributes;
+        newPosition.geometry = geometry;
+        vehicle.currentPosition = newPosition;
+        vehicle.path.push(vehicle.lastPosition);
+        self.getView.graphics.remove(vehicle.lastPosition);
+        self.getView.graphics.add(newPosition);
       },
       Intersection(vehicle, carPosition){
         var self = this;
@@ -363,16 +402,33 @@ var esri = {
           self.vehicleSelected = vehicle;
           self.vehicleSelected.isTraked = setInterval(function() { 
             self.VehiclePathHistory();
-          }, 2000);
+          }, 500);
         }
+      },
+      VehiclePathHistory() {
+        var self = this;
+        if(self.vehicleSelected.pathHistory != null)
+          self.getView.graphics.remove(self.vehicleSelected.pathHistory);
+
+        var path = this.NewGraphicLine();
+        var polyline = {
+          type: "polyline",
+          paths: []
+        };
+        self.vehicleSelected.path.forEach(function(graphic){
+          if(graphic != undefined){
+            polyline.paths.push([graphic.geometry.longitude, graphic.geometry.latitude]);
+          }
+        });
+
+        path.geometry = polyline;
+        self.getView.graphics.add(path);
+        self.vehicleSelected.pathHistory = path;
+        //console.log(path);
       },
       RemovePathHistory(){
         var self = this;
-        self.vehicleSelected.path.forEach(function(graphic){
-          if(graphic != undefined){
-            self.getView.graphics.remove(graphic);
-          }
-        });
+        self.getView.graphics.remove(self.vehicleSelected.pathHistory);
         clearInterval(self.vehicleSelected.isTraked);
         self.vehicleSelected = null;
       },
