@@ -26,37 +26,12 @@ var esri = {
           width: "8px",
           height: "8px"
         },
-        camionetaPic: {
-          type: "picture-marker",
-          url: "https://image.flaticon.com/icons/svg/296/296211.svg",
-          width: "40px",
-          height: "40px"
-        },
-        pickUpPic: {
-          type: "picture-marker",
-          url: "https://image.flaticon.com/icons/svg/517/517554.svg",
-          width: "40px",
-          height: "40px"
-        },
-        dompePic: {
-          type: "picture-marker",
-          url: "https://image.flaticon.com/icons/svg/324/324231.svg",
-          width: "40px",
-          height: "40px"
-        },
-        truckPic: {
-          type: "picture-marker",  
-          url: "https://image.flaticon.com/icons/svg/296/296217.svg",
-          width: "40px",
-          height: "40px"
-        },
         Vehicles:[],
         vehicleSelected:null,
         geoqueryTask: null,
         queryCarIntersection: null,
         queryDotsPathTask: null,
         queryDots: null
-        //clickPosition: null
       }
     },
     mounted() {
@@ -72,43 +47,7 @@ var esri = {
           "vue"
           ])
       .then(([Map, MapView, WebMap, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
-            
-        this.NewGraphic = function(picture){
-          var choferPich = {
-            type: "picture-marker",
-            url: require(`../assets/${picture}.png`),
-            width: "32px",
-            height: "32px"
-          }
-
-          return new Graphic({
-            symbol: choferPich,
-            popupTemplate: {
-              title: "Informacion",
-              content: []
-            },
-            outFields: ["*"]
-          });
-        };
-
-      this.NewGraphicLine = function(){ 
-        let lineSymbol = {
-          type: "simple-line", 
-          color: [255, 0, 0],
-          width: 2
-        }
-        return new Graphic({
-          symbol: lineSymbol
-        });
-      };
-
-        this.NewGraphicPoint = function(){
-          return new Graphic({
-            symbol: markerSymbol
-          })
-        };
-
-        
+                  
         if(this.$store.state.view == null){
           
           // points layer
@@ -152,29 +91,65 @@ var esri = {
           this.$store.state.view.container = "viewDiv";
         }
 
-        // path for all geocercas
-        this.geoqueryTask = new QueryTask({
-          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/3?token=MnKdg3e5qgrvIjCmatideNLBQRsw0wpOFV2OqwHkoUkXPFkyN2UUip4AfO63Jzn_yoVmWMOO_Q7vblnf-Zwt6GxHTf2FtuYhDCs4yZUtiTfqv4ffqxtu7fNEZMoi9LfX_Ar37BR20oUeMd6bv0_Pov8_eRdJOv1HRAaUkdg44ov6pcWfHDWm4saC3EgNKqVgtKUHglW5A9YRNpxl-asgh1dzl4ovrMutKelb2Gv86OZn8dgzih2ox8A4ugO8gqqK"
-        });
+        this.NewGraphic = function(picture){
+          var vehiclePic = {
+            type: "picture-marker",
+            url: require(`../assets/${picture}.png`),
+            width: "32px",
+            height: "32px"
+          }
 
-        // query for detect intersection with the car
-        this.queryCarIntersection = new Query({
-          distance: 5,
-          units: "meters",
-          spatialRelationship: "intersects" // All features that intersect 100 mile buffer
-        });
+          return new Graphic({
+            symbol: vehiclePic,
+            popupTemplate: {
+              title: "Informacion",
+              content: [
+                {
+                  type: "fields",
+                  fieldInfos:[{
+                    fieldName: "PLACAS_VEH",
+                    visible: true,
+                    label: "PLACAS"
+                  }]
+                },
+                {
+                  type: "fields",
+                  fieldInfos:[{
+                    fieldName: "TIPO_VEHI",
+                    visible: true,
+                    label: "Tipo de Transporte"
+                  }]
+                },
+                {
+                  type: "fields",
+                  fieldInfos:[{
+                    fieldName: "NOMBRE",
+                    visible: true,
+                    label: "Chofer"
+                  }]
+                }
+              ]
+            },
+            outFields: ["*"]
+          });
+        };
 
-        // path for dots layer
-        this.queryDotsPathTask = new QueryTask({
-          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/ArcGIS/rest/services/RastreoVehicular/FeatureServer/0"
-        });
+        this.NewGraphicLine = function(){ 
+          let lineSymbol = {
+            type: "simple-line", 
+            color: [255, 0, 0],
+            width: 2
+          }
+          return new Graphic({
+            symbol: lineSymbol
+          });
+        };
 
-        this.queryDots = new Query({
-          outFields: ["*"],
-          orderByFields: ["COLOR_VEHI"],
-          returnGeometry: true,
-          where: "1=1"
-        });
+        this.NewGraphicPoint = function(){
+          return new Graphic({
+            symbol: markerSymbol
+          })
+        };
 
         this.NewQuery = function() {
           return new Query({
@@ -190,31 +165,35 @@ var esri = {
           });
         }
 
-          // this.GetClickPosition = function () {
-          //     var self = this;
-          //     this.getView.on("click", function(event) {
-          //         event.stopPropagation(); // overwrite default click-for-popup behavior
-          
-          //         // Get the coordinates of the click on the view
-          //         var lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
-          //         var lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
-          //         var position = event.mapPoint;
-          //         self.clickPosition = position;
-          //     });
-          // }
-  
-  
-        })
+        // path for all geocercas
+        this.geoqueryTask = new QueryTask({
+          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/3?token=MnKdg3e5qgrvIjCmatideNLBQRsw0wpOFV2OqwHkoUkXPFkyN2UUip4AfO63Jzn_yoVmWMOO_Q7vblnf-Zwt6GxHTf2FtuYhDCs4yZUtiTfqv4ffqxtu7fNEZMoi9LfX_Ar37BR20oUeMd6bv0_Pov8_eRdJOv1HRAaUkdg44ov6pcWfHDWm4saC3EgNKqVgtKUHglW5A9YRNpxl-asgh1dzl4ovrMutKelb2Gv86OZn8dgzih2ox8A4ugO8gqqK"
+        });
+
+        // query for detect intersection with the car
+        this.queryCarIntersection = new Query({
+          distance: 5,
+          units: "meters",
+          spatialRelationship: "intersects" // All features that intersect 100 mile buffer
+        });
+
+        // path for dots layer
+        this.queryDotsPathTask = new QueryTask({
+          url: "https://services.arcgis.com/CT0bYvH48f1TEH2t/arcgis/rest/services/MonitoreoWebMap_WFL1/FeatureServer/2?token=2Qiumvvtgtq9B0BHRp-s3TYE-Sr0CrgprrytNVDdZjrkzHaEj4gE31BSRpbKdoc1s_2MWX-amimVt3iKI8lR9M_vn8JgIsb-84e4M0col9J43gSo2AGnXk-53Z5kMoEg_o6MAhInhS40h8DsOFzcd2nLJyN2cadyw2_UeQp4LTAeviIkkE0hWmbXc7PVkHQD9vMyDHCB4cMPLacmNgesUkHYGVT59ItSP1kMZoN-YolLwBLgkkyuikwNI3vvGS2a"
+        });
+
+        this.queryDots = new Query({
+          outFields: ["*"],
+          orderByFields: ["COLOR_VEHI"],
+          returnGeometry: true,
+          where: "1=1"
+        });
+
+      })
       .catch(err => { console.error(err); });
     },
     created(){},
     computed:{
-      getCoords(){
-        return this.$store.state.coords;
-      },
-      getTrakRout(){
-        return this.$store.state.trackCoods;
-      },
       getView(){
         return this.$store.state.view;
       },
@@ -238,10 +217,10 @@ var esri = {
         var self = this;
         self.Vehicles = [];
         var query = self.NewQuery();
-          query.orderByFields = ["POSI_ID"],
-          query.where = "1=1";
-
-          self.queryDotsPathTask.execute(query).then(function(result){
+        query.orderByFields = ["POSI_ID"],
+        query.where = "1=1";
+        
+        self.queryDotsPathTask.execute(query).then(function(result){
             var features = result.features;
             var geometries = [];
             var attributes = {};
@@ -250,7 +229,6 @@ var esri = {
               geometries = [];
               features.forEach(function(element){
                 if(element.attributes.VEHICLE_ID == chofer.VEHICLE_ID){
-                    //console.log(chofer.VEHICLE_ID);
                     attributes = element.attributes;
                     geometries.push(element.geometry);
                   }
@@ -277,74 +255,56 @@ var esri = {
             });
             console.log(self.$store.state.vehicles)
             self.$store.state.vehicles.forEach(function(vehicle){
-              self.Simulation(vehicle);
+              self.StartSimulation(vehicle);
             })
           });
       },
-      Simulation(vehicle){
+      StartSimulation(vehicle){
         var self = this;
         vehicle.currentCoordIndex = 0;
           setInterval(function() {
-              self.SinglePointMove(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
+              self.MoveGraphicVehicle(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               self.Intersection(vehicle, vehicle.vehicle.geometry[vehicle.currentCoordIndex]);
               vehicle.currentCoordIndex = (vehicle.currentCoordIndex + 1) % vehicle.vehicle.geometry.length;
-              if(vehicle.currentCoordIndex == 0)
+              if(vehicle.currentCoordIndex == 1){
+                self.getView.graphics.remove(vehicle.pathHistory);
                 vehicle.path = [];
+                vehicle.pathHistory = null;
+              }
           }, 2000);
       },
-      SinglePointMove(vehicle, geometry) {
+      MoveGraphicVehicle(vehicle, geometry) {
         var self = this;
         vehicle.lastPosition = vehicle.currentPosition;
-        var newPosition = null;    
-        switch(vehicle.TIPO_VEHI){
-          case "Nitrógeno":
-            newPosition = self.NewGraphic("pipa");
-          break;
-          case "Líneas de Acero":
-            newPosition = self.NewGraphic("carga");
-          break;
-          case "Material Eléctrico":
-            newPosition = self.NewGraphic("truck");
-          break;
-          case "Aceite":
-            newPosition = self.NewGraphic("carga");;
-          break;
-        }
-
-        var fields = [
-          {
-            type: "fields",
-            fieldInfos:[{
-              fieldName: "PLACAS_VEH",
-              visible: true,
-              label: "PLACAS"
-            }]
-          },
-          {
-            type: "fields",
-            fieldInfos:[{
-              fieldName: "TIPO_VEHI",
-              visible: true,
-              label: "Tipo de Transporte"
-            }]
-          },
-          {
-            type: "fields",
-            fieldInfos:[{
-              fieldName: "NOMBRE",
-              visible: true,
-              label: "Chofer"
-            }]
-          }
-        ];
-        vehicle.vehicle.attributes.NOMBRE = vehicle.nombre;
-        newPosition.popupTemplate.content = fields;
-        newPosition.attributes = vehicle.vehicle.attributes;
-        newPosition.geometry = geometry;
-        vehicle.currentPosition = newPosition;
         vehicle.path.push(vehicle.lastPosition);
         self.getView.graphics.remove(vehicle.lastPosition);
-        self.getView.graphics.add(newPosition);
+
+        var newVehicleGraphic = self.CreateVehicleGraphic(vehicle.TIPO_VEHI);
+        vehicle.vehicle.attributes.NOMBRE = vehicle.nombre;
+        newVehicleGraphic.attributes = vehicle.vehicle.attributes;
+        newVehicleGraphic.geometry = geometry;
+
+        vehicle.currentPosition = newVehicleGraphic;
+        self.getView.graphics.add(newVehicleGraphic);
+      },
+      CreateVehicleGraphic(typeVehicle){
+        var self = this;
+        var newGraphic = null;    
+        switch(typeVehicle){
+          case "Nitrógeno":
+            newGraphic = self.NewGraphic("pipa");
+          break;
+          case "Líneas de Acero":
+            newGraphic = self.NewGraphic("carga");
+          break;
+          case "Material Eléctrico":
+            newGraphic = self.NewGraphic("truck");
+          break;
+          case "Aceite":
+            newGraphic = self.NewGraphic("carga");;
+          break;
+        }
+        return newGraphic;
       },
       Intersection(vehicle, carPosition){
         var self = this;
@@ -359,15 +319,23 @@ var esri = {
                 fechaSalida: null,
                 outDate:null,
                 time: null,
-                lugar: place
+                lugar: place,
+                VEHICLE_ID: vehicle.VEHICLE_ID,
+                TIPO_VEHI: vehicle.TIPO_VEHI,
+                chofer: vehicle.nombre
               }
               vehicle.check.push(check);
               vehicle.lastPlace = place;
               vehicle.inSide = true;
               vehicle.outSide = false;
+
+              self.$store.state.checks.push(check);
             }
           }else {
             if(!vehicle.outSide){
+              let check = self.$store.state.checks.find(function(check) {
+                return check.VEHICLE_ID == vehicle.VEHICLE_ID;
+              });
               let lastCheck = vehicle.check[vehicle.check.length - 1];
               lastCheck.outDate = new Date(Date.now());
               lastCheck.fechaSalida = DateFormat(lastCheck.outDate, 'dddd dd/mmmm/yyyy - HH:MM:ss TT');
@@ -375,7 +343,8 @@ var esri = {
               vehicle.check[vehicle.check.length - 1].time = dateDiff;
               vehicle.inSide = false;
               vehicle.outSide = true;
-              // Save on Database
+              check = lastCheck;
+
             }
           }
         });
@@ -383,15 +352,13 @@ var esri = {
       TrackVehicle(VEHICLE_ID) {
         var self = this;
         if(self.vehicleSelected == null || self.vehicleSelected.VEHICLE_ID != VEHICLE_ID){
-          var vehicle = self.$store.state.vehicles.find(function(element) {
+
+          let vehicle = self.$store.state.vehicles.find(function(element) {
             return element.VEHICLE_ID == VEHICLE_ID;
           });
 
-          if(self.vehicleSelected != null){
-            console.log('clear traked');
-            clearInterval(self.vehicleSelected.isTraked);
+          if(self.vehicleSelected != null)
             self.RemovePathHistory();
-          }
 
           self.vehicleSelected = vehicle;
           self.getView.goTo({
@@ -399,137 +366,44 @@ var esri = {
             scale: 16000,
           });
           
-          self.vehicleSelected = vehicle;
           self.vehicleSelected.isTraked = setInterval(function() { 
-            self.VehiclePathHistory();
-          }, 500);
+            self.DrawVehiclePathHistory();
+          }, 0);
         }
       },
-      VehiclePathHistory() {
+      DrawVehiclePathHistory() {
         var self = this;
+
         if(self.vehicleSelected.pathHistory != null)
           self.getView.graphics.remove(self.vehicleSelected.pathHistory);
+          
+          var path = this.NewGraphicLine();
+          var polyline = {
+            type: "polyline",
+            paths: []
+          };
+          self.vehicleSelected.path.forEach(function(graphic){
+            if(graphic != undefined){
+              polyline.paths.push([graphic.geometry.longitude, graphic.geometry.latitude]);
+            }
+          });
+          
+          path.geometry = polyline;
+          self.getView.graphics.add(path);
+          self.vehicleSelected.pathHistory = path;
 
-        var path = this.NewGraphicLine();
-        var polyline = {
-          type: "polyline",
-          paths: []
-        };
-        self.vehicleSelected.path.forEach(function(graphic){
-          if(graphic != undefined){
-            polyline.paths.push([graphic.geometry.longitude, graphic.geometry.latitude]);
+          if(self.vehicleSelected.currentCoordIndex == 1){
+            self.getView.graphics.remove(self.vehicleSelected.pathHistory);
+            self.vehicleSelected.path = [];
+            self.vehicleSelected.pathHistory = null;
           }
-        });
-
-        path.geometry = polyline;
-        self.getView.graphics.add(path);
-        self.vehicleSelected.pathHistory = path;
-        //console.log(path);
       },
       RemovePathHistory(){
         var self = this;
         self.getView.graphics.remove(self.vehicleSelected.pathHistory);
         clearInterval(self.vehicleSelected.isTraked);
         self.vehicleSelected = null;
-      },
-      Report(){
-
-      },
-      Test(){
-        // GetVehicle(VEHICLE_ID){
-        //   var self = this;
-
-        //   if(self.vehicleSelected.attributes.VEHICLE_ID != VEHICLE_ID){
-        //     console.log(VEHICLE_ID)
-        //     clearInterval(self.vehicleSelected.isTraked);
-        //     self.vehicleSelected = {
-        //       attributes:{},
-        //       geometries:[],
-        //       lastPosition:null,
-        //       isTraked:null
-        //     }
-
-        //     var query = self.NewQuery();
-        //       query.orderByFields = ["POSI_ID"];
-        //       query.where = `"VEHICLE_ID" = '${VEHICLE_ID}'`;
-
-        //     self.queryDotsPathTask.execute(query).then(function(result){
-        //       var features = result.features;
-        //       var geometries = [];
-        //       var attributes = {};
-        //       features.forEach(function(element){
-        //         attributes = element.attributes;
-        //         geometries.push(element.geometry);
-        //       });
-        //       self.vehicleSelected = {attributes: attributes, geometry: geometries};
-        //       self.Track(self.vehicleSelected.geometry[0]);
-        //       self.StarSimulation();
-        //     });
-        //   }else{
-        //     self.Track(self.vehicleSelected.lastPosition);
-        //   }
-        // },
-        // StarSimulation(){
-        //   var self = this;
-        //   var currentCoordIndex = 0;
-        //   self.vehicleSelected.isTraked =  setInterval(function() {
-        //         self.PointMove(self.vehicleSelected.geometry[currentCoordIndex]);
-        //         self.Intersection(self.vehicleSelected.geometry[currentCoordIndex]);
-        //         //self.Track(self.vehicleSelected.geometry[currentCoordIndex]);
-        //         currentCoordIndex = (currentCoordIndex + 1) % self.vehicleSelected.geometry.length;
-        //     }, 300);
-        // },
-        // Start(){
-        //     var self = this;
-        //     self.queryDotsPathTask.execute(self.queryDots).then(function(result){
-        //       self.coords = [];
-        //       var features = result.features;
-        //       features.forEach(function(element){
-        //         var color = element.attributes.COLOR_VEHI;
-        //         var placas = element.attributes.PLACAS_VEH;
-        //         var id = element.attributes.POSI_ID;
-        //         var latitude = element.geometry.latitude;
-        //         var longitude = element.geometry.longitude;
-        //         self.coords.push({"COLOR_VEHI ": color, "PLACAS_VEH ": placas, "POSI_ID": id , "latitude": latitude, "longitude":longitude})
-        //         self.trakRout.push(element.geometry);
-        //       });
-        //       //console.log(self.coords);
-        //       self.Track(self.trakRout[0]);
-        //       self.Simulation();
-        //     });
-        // },
-        // PointMove(geometry) {
-        //     var pointGraphic = this.NewGraphic();
-        //     pointGraphic.geometry = geometry;
-        //     this.vehicleSelected.lastPosition = geometry;
-        //     this.getView.graphics.removeAll();
-        //     this.getView.graphics.add(pointGraphic);
-        // },
-        // ClickMap(name){
-        //     var self = this;
-        //     self.GetClickPosition();
-        //     setTimeout(() => {
-        //         self.CreateVeicles(self.clickPosition, name);
-        //     }, 500);
-        // },
-        // CreateVeicles(location, name='nadie'){
-        //     var point = {
-        //         type: "point", // autocasts as new Point()
-        //         longitude: location.longitude,
-        //         latitude: location.latitude
-        //       };
-      
-        //       // Create a graphic and add the geometry and symbol to it
-        //       var pointGraphic = this.NewGraphic();
-        //       pointGraphic.geometry = point;
-        //       pointGraphic.attributes = {Nombre: name, Vehiculo: '001', Palacas: 'abc'}
-        //       this.getView.graphics.add(pointGraphic);
-        // },
-        // TestTrak(name){
-        //     console.log('Traking: ' + name);
-        //     //this.Track(self.trakRout[0]);
-        // }
-      } 
+      }
     }
   }
 export default esri;

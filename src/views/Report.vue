@@ -1,6 +1,7 @@
 <template>
   <v-layout>
     <v-flex>
+      <h2>Reporte de choferes</h2> <br>
        <v-expansion-panel>
         <v-expansion-panel-content v-for="(item, index) in vehicles" :key="index">
           <div slot="header">
@@ -49,38 +50,6 @@
         {
           text: "Tiempo",
           sortable: false
-        }
-      ],
-      items:[
-        {
-          lugar:'La choca',
-          inDate: new Date(),
-          outDate: new Date(),
-          time: "0:0:5"
-        },
-        {
-          lugar:'Pemex',
-          inDate: new Date(),
-          outDate: new Date(),
-          time: "0:0:5"
-        },
-        {
-          lugar:'La choca',
-          inDate: new Date(),
-          outDate: new Date(),
-          time: "0:0:5"
-        },
-        {
-          lugar:'La choca',
-          inDate: new Date(),
-          outDate: new Date(),
-          time: "0:0:5"
-        },
-        {
-          lugar:'La choca',
-          inDate: new Date(),
-          outDate: new Date(),
-          time: "0:0:5"
         }
       ]
     }),

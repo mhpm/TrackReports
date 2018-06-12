@@ -14,25 +14,13 @@
           </v-list-tile>
         <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
         <v-list>
-          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="">
+          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="TrackVehicle(item.VEHICLE_ID)">
             <v-list-tile-avatar>
               <img :src="require(`../assets/${item.img}.jpg`)" alt="">
             </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.nombre" style="cursor: pointer;" @click="TrackVehicle(item.VEHICLE_ID), cardDisplay? cardDisplay=true:cardDisplay=true"></v-list-tile-title>
+            <v-list-tile-title v-text="item.nombre" style="cursor: pointer;" @click="cardDisplay? cardDisplay=true:cardDisplay=true"></v-list-tile-title>
           </v-list-tile>
         </v-list>
-        <!-- <v-list-tile class="mt-3" @click="">
-          <v-list-tile-action>
-            <v-icon color="grey darken-1">add_circle_outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Browse Channels</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="">
-          <v-list-tile-action>
-            <v-icon color="grey darken-1">settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Manage Subscriptions</v-list-tile-title>
-        </v-list-tile> -->
       </v-list>
     </v-navigation-drawer>
 
@@ -43,16 +31,6 @@
         <span class="title">Monitoreo del programa operativo semanal</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <!-- <v-layout row align-center style="max-width: 650px">
-        <v-text-field
-          :append-icon-cb="() => {}"
-          placeholder="Search..."
-          single-line
-          append-icon="search"
-          color="white"
-          hide-details
-        ></v-text-field>
-      </v-layout> -->
     </v-toolbar>
 
     <v-flex v-if="cardDisplay" class="floatCard">
@@ -88,7 +66,8 @@ export default {
     drawer: false,
     items: [
       { icon: 'map', text: 'Mapa', route:"mapa"},
-      { icon: 'assignment_turned_in', text: 'Reporte', route:"report"}
+      { icon: 'assignment_ind', text: 'Reporte de choferes', route:"report"},
+      { icon: 'assignment_turned_in', text: 'Reporte de Pozos', route:"geocercas"}
     ]
   }),
   methods:{
@@ -103,10 +82,6 @@ export default {
       vehicles(){
           return this.$store.state.vehicles;
       }
-  },
-  created(){
-    //console.log(this.choferes);
-    
   }
 }
 </script>
