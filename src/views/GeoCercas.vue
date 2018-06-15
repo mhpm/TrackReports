@@ -20,6 +20,7 @@
                     <template slot="items" slot-scope="props">
                       <td class="text-left">{{ props.item.chofer }}</td>
                       <td class="text-left">{{ props.item.TIPO_VEHI }}</td>
+                      <td class="text-left">{{ props.item.Proceso }}</td>
                       <td class="text-left">{{ props.item.fechaEntrada }}</td>
                       <td class="text-left">{{ props.item.fechaSalida }}</td>
                       <td v-if="props.item.time != null" class="text-left"> {{props.item.time.h}}:{{props.item.time.m}}:{{props.item.time.s}}</td>
@@ -43,6 +44,10 @@
           },
           {
             text: "Tipo de Vehiculo",
+            sortable: false
+          },
+           {
+            text: "Proceso",
             sortable: false
           },
           {

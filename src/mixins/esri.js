@@ -37,6 +37,7 @@ var esri = {
     mounted() {
       loadModules([
           'esri/Map',
+          "esri/geometry/geometryEngine",
           'esri/views/MapView',
           "esri/WebMap",
           "esri/widgets/BasemapToggle",
@@ -46,7 +47,7 @@ var esri = {
           "esri/layers/FeatureLayer",
           "vue"
           ])
-      .then(([Map, MapView, WebMap, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
+      .then(([Map, geometryEngine, MapView, WebMap, BasemapToggle, Graphic, QueryTask, Query, FeatureLayer, Vue]) => {
                   
         if(this.$store.state.view == null){
           
@@ -91,6 +92,8 @@ var esri = {
           this.$store.state.view.container = "viewDiv";
         }
 
+        this.GE = Object.assign(geometryEngine);
+
         this.NewGraphic = function(picture){
           var vehiclePic = {
             type: "picture-marker",
@@ -117,7 +120,15 @@ var esri = {
                   fieldInfos:[{
                     fieldName: "TIPO_VEHI",
                     visible: true,
-                    label: "Tipo de Transporte"
+                    label: "Tipo de Vehiculo"
+                  }]
+                },
+                {
+                  type: "fields",
+                  fieldInfos:[{
+                    fieldName: "ALIAS",
+                    visible: true,
+                    label: "Proceso"
                   }]
                 },
                 {
@@ -192,7 +203,8 @@ var esri = {
       })
       .catch(err => { console.error(err); });
     },
-    created(){},
+    created(){
+    },
     computed:{
       getView(){
         return this.$store.state.view;
@@ -239,8 +251,9 @@ var esri = {
                 COLOR_VEHI: tempVehicle.attributes.COLOR_VEHI, 
                 PLACAS_VEH: tempVehicle.attributes.PLACAS_VEH,
                 TIPO_VEHI: chofer.type,
+                Proceso: chofer.Proceso,
                 picture: Math.floor((Math.random() * 50) + 1),
-                img: chofer.img, 
+                img: chofer.img,
                 nombre: chofer.text,
                 vehicle: tempVehicle, 
                 currentCoordIndex: 0,
@@ -271,21 +284,24 @@ var esri = {
                 vehicle.path = [];
                 vehicle.pathHistory = null;
               }
-          }, 2000);
+              // vehicle.distance = self.GE.geodesicLength(vehicle.path.geometry, "kilometers").toFixed(2);
+          }, 5000);
       },
       MoveGraphicVehicle(vehicle, geometry) {
         var self = this;
         vehicle.lastPosition = vehicle.currentPosition;
-        vehicle.path.push(vehicle.lastPosition);
         self.getView.graphics.remove(vehicle.lastPosition);
-
-        var newVehicleGraphic = self.CreateVehicleGraphic(vehicle.TIPO_VEHI);
+        
+        var newVehicleGraphic = self.CreateVehicleGraphic(vehicle.Proceso);
         vehicle.vehicle.attributes.NOMBRE = vehicle.nombre;
+        vehicle.vehicle.attributes.TIPO_VEHI = vehicle.TIPO_VEHI;
+        vehicle.vehicle.attributes.ALIAS = vehicle.Proceso;
         newVehicleGraphic.attributes = vehicle.vehicle.attributes;
         newVehicleGraphic.geometry = geometry;
-
+        
         vehicle.currentPosition = newVehicleGraphic;
         self.getView.graphics.add(newVehicleGraphic);
+        vehicle.path.push(vehicle.currentPosition);
       },
       CreateVehicleGraphic(typeVehicle){
         var self = this;
@@ -322,6 +338,7 @@ var esri = {
                 lugar: place,
                 VEHICLE_ID: vehicle.VEHICLE_ID,
                 TIPO_VEHI: vehicle.TIPO_VEHI,
+                Proceso: vehicle.Proceso,
                 chofer: vehicle.nombre
               }
               vehicle.check.push(check);
@@ -391,6 +408,7 @@ var esri = {
           path.geometry = polyline;
           self.getView.graphics.add(path);
           self.vehicleSelected.pathHistory = path;
+          // self.vehicleSelected.distance = this.GE.geodesicLength(path.geometry, "kilometers").toFixed(2);
 
           if(self.vehicleSelected.currentCoordIndex == 1){
             self.getView.graphics.remove(self.vehicleSelected.pathHistory);

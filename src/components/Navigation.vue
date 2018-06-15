@@ -44,7 +44,9 @@
             <div>
               Chofer: {{vehicleSelected.nombre}}<br>
               Color del Vehiculo: {{vehicleSelected.COLOR_VEHI}} <br>
-              Tipo de vehiculo: {{vehicleSelected.TIPO_VEHI}}
+              Vehiculo: {{vehicleSelected.TIPO_VEHI}} <br>
+              Proceso: {{vehicleSelected.Proceso}}
+              <!-- Distancia recorrida: {{vehicleSelected.distance}} Km -->
             </div>
           </div>
         </v-card-title>
