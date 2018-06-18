@@ -12,15 +12,43 @@
               </v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-        <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
-        <v-list>
-          <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="TrackVehicle(item.VEHICLE_ID)">
-            <v-list-tile-avatar>
-              <img :src="require(`../assets/${item.img}.jpg`)" alt="">
-            </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.nombre" style="cursor: pointer;" @click="cardDisplay? cardDisplay=true:cardDisplay=true"></v-list-tile-title>
-          </v-list-tile>
-        </v-list>
+          <v-tabs v-model="active" color="dark" dark slider-color="white" >
+            <v-tab ripple >
+              <v-subheader class="mt-3 grey--text text--darken-1">Choferes</v-subheader>
+            </v-tab>
+              <v-tab ripple >
+              <v-subheader class="mt-3 grey--text text--darken-1">Geocercas</v-subheader>
+            </v-tab>
+            <v-tab-item >
+              <v-card flat>
+                <v-card-text>
+                  <v-list>
+                    <v-list-tile v-for="item in vehicles" :key="item.VEHICLE_ID" avatar @click="TrackVehicle(item.VEHICLE_ID)">
+                      <v-list-tile-avatar>
+                        <img :src="require(`../assets/${item.img}.jpg`)" alt="">
+                      </v-list-tile-avatar>
+                      <v-list-tile-title v-text="item.nombre" style="cursor: pointer;" @click="cardDisplay? cardDisplay=true:cardDisplay=true"></v-list-tile-title>
+                    </v-list-tile>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item  @click="">
+              <v-card flat>
+                <v-card-text>
+                  <v-list>
+                    <v-list-tile v-for="item in geocercas" :key="item.OBJECTID" avatar @click="TrackGeocerca(item), cardDisplay = false, RemovePathHistory()">
+                      <!-- <v-list-tile-avatar>
+                        <img :src="require(`../assets/${item.img}.jpg`)" alt="">
+                      </v-list-tile-avatar> -->
+                      <v-icon>place</v-icon> &nbsp;
+                      <v-list-tile-title v-text="item.attributes.NOMBRE" style="cursor: pointer;"></v-list-tile-title>
+                    </v-list-tile>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+          </v-tabs>
       </v-list>
     </v-navigation-drawer>
 
@@ -64,6 +92,7 @@ import esriMethos from './../mixins/esri.js';
 export default {
   mixins: [esriMethos],
   data: () => ({
+    active: null,
     cardDisplay:false,
     drawer: false,
     items: [
@@ -73,6 +102,10 @@ export default {
     ]
   }),
   methods:{
+    next () {
+      const active = parseInt(this.active)
+      this.active = (active < 2 ? active + 1 : 0).toString()
+    },
     StopTrack(){
       clearInterval(this.vehicleSelected.isTraked)
     },
@@ -83,6 +116,9 @@ export default {
   computed:{
       vehicles(){
           return this.$store.state.vehicles;
+      },
+      geocercas(){
+          return this.$store.state.geocercas;
       }
   }
 }

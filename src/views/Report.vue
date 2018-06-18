@@ -37,30 +37,12 @@
   export default {
     data: () => ({
       headers:[
-        {
-          text: "Lugar",
-          sortable: false
-        },
-        {
-            text: "Tipo de Vehiculo",
-            sortable: false
-          },
-           {
-            text: "Proceso",
-            sortable: false
-          },
-        {
-          text: "Fecha Entrada",
-          sortable: false
-        },
-        {
-          text: "Fecha Salida",
-          sortable: false
-        },
-        {
-          text: "Tiempo",
-          sortable: false
-        }
+        { text: "Lugar", sortable: false },
+        { text: "Tipo de Vehiculo", sortable: false },
+        { text: "Proceso", sortable: false },
+        { text: "Fecha Entrada", sortable: false },
+        { text: "Fecha Salida", sortable: false },
+        { text: "Tiempo", sortable: false }
       ]
     }),
     computed:{

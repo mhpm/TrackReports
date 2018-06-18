@@ -203,8 +203,7 @@ var esri = {
       })
       .catch(err => { console.error(err); });
     },
-    created(){
-    },
+    created(){},
     computed:{
       getView(){
         return this.$store.state.view;
@@ -224,6 +223,24 @@ var esri = {
         d = Math.floor(h / 24);
         h = h % 24;
         return { d: d, h: h, m: m, s: s };
+      },
+      GetAllGeoCercas(){
+        var self = this;
+        var query = self.NewQuery();
+        query.orderByFields = ["Nombre"],
+        query.where = "1=1";
+
+        self.geoqueryTask.execute(query).then(function(result){
+          result.features.forEach(function(geocerca){
+            self.$store.state.geocercas.push(geocerca);
+          });
+        });
+      },
+      TrackGeocerca(geo){
+        this.getView.goTo({
+          center: geo.geometry,
+          scale: 16000,
+        });
       },
       GetAllVehicles(){
         var self = this;
@@ -266,11 +283,12 @@ var esri = {
               });
               self.$store.state.vehicles = self.Vehicles;
             });
-            console.log(self.$store.state.vehicles)
+            //console.log(self.$store.state.vehicles)
             self.$store.state.vehicles.forEach(function(vehicle){
               self.StartSimulation(vehicle);
             })
-          });
+        });
+        this.GetAllGeoCercas();
       },
       StartSimulation(vehicle){
         var self = this;
@@ -418,9 +436,11 @@ var esri = {
       },
       RemovePathHistory(){
         var self = this;
-        self.getView.graphics.remove(self.vehicleSelected.pathHistory);
-        clearInterval(self.vehicleSelected.isTraked);
-        self.vehicleSelected = null;
+        if(self.vehicleSelected != null){
+          self.getView.graphics.remove(self.vehicleSelected.pathHistory);
+          clearInterval(self.vehicleSelected.isTraked);
+          self.vehicleSelected = null;
+        }
       }
     }
   }
